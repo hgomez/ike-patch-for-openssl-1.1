@@ -1,5 +1,6 @@
 # ike-patch-for-openssl-1.1
-Patches so Ike is OpenSSL 1.1+ compatible
+
+OpenSSL 1.1 make many internal structures opaques and Ike required some updates [OpenSSL 1.1 backward compatibility guide](https://wiki.openssl.org/index.php/OpenSSL_1.1.0_Changes#Backward_compatibility)
 
 ## How to use it ?
 
