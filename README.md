@@ -9,8 +9,9 @@ OpenSSL 1.1 make many internal structures opaques and Ike required some updates 
     tar xvjf ike-2.2.1-release.tbz2
     
     # Patch
+    wget https://raw.githubusercontent.com/hgomez/ike-patch-for-openssl-1.1/master/ike.patch
     cd ike
-    patch -p1 <PATH/TO/ike.patch
+    patch -p1 <../ike.patch
     
     # Make
     cmake -DCMAKE_INSTALL_PREFIX=/usr -DQTGUI=NO -DETCDIR=/etc -DNATT=YES
