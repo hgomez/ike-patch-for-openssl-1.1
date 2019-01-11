@@ -5,7 +5,7 @@ Patches so Ike is OpenSSL 1.1+ compatible
 
     # Get latest sources
     wget https://www.shrew.net/download/ike/ike-2.2.1-release.tbz2
-    tar xvzjf ike-2.2.1-release.tbz2
+    tar xvjf ike-2.2.1-release.tbz2
     
     # Patch
     cd ike
