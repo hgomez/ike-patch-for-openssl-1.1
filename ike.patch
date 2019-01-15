@@ -1,438 +1,3328 @@
+diff -Nru -X exclude-ext ike.orig/CMakeFiles/3.10.2/CompilerIdC/CMakeCCompilerId.c ike/CMakeFiles/3.10.2/CompilerIdC/CMakeCCompilerId.c
+--- ike.orig/CMakeFiles/3.10.2/CompilerIdC/CMakeCCompilerId.c	1970-01-01 01:00:00.000000000 +0100
++++ ike/CMakeFiles/3.10.2/CompilerIdC/CMakeCCompilerId.c	2019-01-14 13:25:29.328290034 +0100
+@@ -0,0 +1,598 @@
++#ifdef __cplusplus
++# error "A C++ compiler has been selected for C."
++#endif
++
++#if defined(__18CXX)
++# define ID_VOID_MAIN
++#endif
++#if defined(__CLASSIC_C__)
++/* cv-qualifiers did not exist in K&R C */
++# define const
++# define volatile
++#endif
++
++
++/* Version number components: V=Version, R=Revision, P=Patch
++   Version date components:   YYYY=Year, MM=Month,   DD=Day  */
++
++#if defined(__INTEL_COMPILER) || defined(__ICC)
++# define COMPILER_ID "Intel"
++# if defined(_MSC_VER)
++#  define SIMULATE_ID "MSVC"
++# endif
++  /* __INTEL_COMPILER = VRP */
++# define COMPILER_VERSION_MAJOR DEC(__INTEL_COMPILER/100)
++# define COMPILER_VERSION_MINOR DEC(__INTEL_COMPILER/10 % 10)
++# if defined(__INTEL_COMPILER_UPDATE)
++#  define COMPILER_VERSION_PATCH DEC(__INTEL_COMPILER_UPDATE)
++# else
++#  define COMPILER_VERSION_PATCH DEC(__INTEL_COMPILER   % 10)
++# endif
++# if defined(__INTEL_COMPILER_BUILD_DATE)
++  /* __INTEL_COMPILER_BUILD_DATE = YYYYMMDD */
++#  define COMPILER_VERSION_TWEAK DEC(__INTEL_COMPILER_BUILD_DATE)
++# endif
++# if defined(_MSC_VER)
++   /* _MSC_VER = VVRR */
++#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
++#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
++# endif
++
++#elif defined(__PATHCC__)
++# define COMPILER_ID "PathScale"
++# define COMPILER_VERSION_MAJOR DEC(__PATHCC__)
++# define COMPILER_VERSION_MINOR DEC(__PATHCC_MINOR__)
++# if defined(__PATHCC_PATCHLEVEL__)
++#  define COMPILER_VERSION_PATCH DEC(__PATHCC_PATCHLEVEL__)
++# endif
++
++#elif defined(__BORLANDC__) && defined(__CODEGEARC_VERSION__)
++# define COMPILER_ID "Embarcadero"
++# define COMPILER_VERSION_MAJOR HEX(__CODEGEARC_VERSION__>>24 & 0x00FF)
++# define COMPILER_VERSION_MINOR HEX(__CODEGEARC_VERSION__>>16 & 0x00FF)
++# define COMPILER_VERSION_PATCH DEC(__CODEGEARC_VERSION__     & 0xFFFF)
++
++#elif defined(__BORLANDC__)
++# define COMPILER_ID "Borland"
++  /* __BORLANDC__ = 0xVRR */
++# define COMPILER_VERSION_MAJOR HEX(__BORLANDC__>>8)
++# define COMPILER_VERSION_MINOR HEX(__BORLANDC__ & 0xFF)
++
++#elif defined(__WATCOMC__) && __WATCOMC__ < 1200
++# define COMPILER_ID "Watcom"
++   /* __WATCOMC__ = VVRR */
++# define COMPILER_VERSION_MAJOR DEC(__WATCOMC__ / 100)
++# define COMPILER_VERSION_MINOR DEC((__WATCOMC__ / 10) % 10)
++# if (__WATCOMC__ % 10) > 0
++#  define COMPILER_VERSION_PATCH DEC(__WATCOMC__ % 10)
++# endif
++
++#elif defined(__WATCOMC__)
++# define COMPILER_ID "OpenWatcom"
++   /* __WATCOMC__ = VVRP + 1100 */
++# define COMPILER_VERSION_MAJOR DEC((__WATCOMC__ - 1100) / 100)
++# define COMPILER_VERSION_MINOR DEC((__WATCOMC__ / 10) % 10)
++# if (__WATCOMC__ % 10) > 0
++#  define COMPILER_VERSION_PATCH DEC(__WATCOMC__ % 10)
++# endif
++
++#elif defined(__SUNPRO_C)
++# define COMPILER_ID "SunPro"
++# if __SUNPRO_C >= 0x5100
++   /* __SUNPRO_C = 0xVRRP */
++#  define COMPILER_VERSION_MAJOR HEX(__SUNPRO_C>>12)
++#  define COMPILER_VERSION_MINOR HEX(__SUNPRO_C>>4 & 0xFF)
++#  define COMPILER_VERSION_PATCH HEX(__SUNPRO_C    & 0xF)
++# else
++   /* __SUNPRO_CC = 0xVRP */
++#  define COMPILER_VERSION_MAJOR HEX(__SUNPRO_C>>8)
++#  define COMPILER_VERSION_MINOR HEX(__SUNPRO_C>>4 & 0xF)
++#  define COMPILER_VERSION_PATCH HEX(__SUNPRO_C    & 0xF)
++# endif
++
++#elif defined(__HP_cc)
++# define COMPILER_ID "HP"
++  /* __HP_cc = VVRRPP */
++# define COMPILER_VERSION_MAJOR DEC(__HP_cc/10000)
++# define COMPILER_VERSION_MINOR DEC(__HP_cc/100 % 100)
++# define COMPILER_VERSION_PATCH DEC(__HP_cc     % 100)
++
++#elif defined(__DECC)
++# define COMPILER_ID "Compaq"
++  /* __DECC_VER = VVRRTPPPP */
++# define COMPILER_VERSION_MAJOR DEC(__DECC_VER/10000000)
++# define COMPILER_VERSION_MINOR DEC(__DECC_VER/100000  % 100)
++# define COMPILER_VERSION_PATCH DEC(__DECC_VER         % 10000)
++
++#elif defined(__IBMC__) && defined(__COMPILER_VER__)
++# define COMPILER_ID "zOS"
++  /* __IBMC__ = VRP */
++# define COMPILER_VERSION_MAJOR DEC(__IBMC__/100)
++# define COMPILER_VERSION_MINOR DEC(__IBMC__/10 % 10)
++# define COMPILER_VERSION_PATCH DEC(__IBMC__    % 10)
++
++#elif defined(__IBMC__) && !defined(__COMPILER_VER__) && __IBMC__ >= 800
++# define COMPILER_ID "XL"
++  /* __IBMC__ = VRP */
++# define COMPILER_VERSION_MAJOR DEC(__IBMC__/100)
++# define COMPILER_VERSION_MINOR DEC(__IBMC__/10 % 10)
++# define COMPILER_VERSION_PATCH DEC(__IBMC__    % 10)
++
++#elif defined(__IBMC__) && !defined(__COMPILER_VER__) && __IBMC__ < 800
++# define COMPILER_ID "VisualAge"
++  /* __IBMC__ = VRP */
++# define COMPILER_VERSION_MAJOR DEC(__IBMC__/100)
++# define COMPILER_VERSION_MINOR DEC(__IBMC__/10 % 10)
++# define COMPILER_VERSION_PATCH DEC(__IBMC__    % 10)
++
++#elif defined(__PGI)
++# define COMPILER_ID "PGI"
++# define COMPILER_VERSION_MAJOR DEC(__PGIC__)
++# define COMPILER_VERSION_MINOR DEC(__PGIC_MINOR__)
++# if defined(__PGIC_PATCHLEVEL__)
++#  define COMPILER_VERSION_PATCH DEC(__PGIC_PATCHLEVEL__)
++# endif
++
++#elif defined(_CRAYC)
++# define COMPILER_ID "Cray"
++# define COMPILER_VERSION_MAJOR DEC(_RELEASE_MAJOR)
++# define COMPILER_VERSION_MINOR DEC(_RELEASE_MINOR)
++
++#elif defined(__TI_COMPILER_VERSION__)
++# define COMPILER_ID "TI"
++  /* __TI_COMPILER_VERSION__ = VVVRRRPPP */
++# define COMPILER_VERSION_MAJOR DEC(__TI_COMPILER_VERSION__/1000000)
++# define COMPILER_VERSION_MINOR DEC(__TI_COMPILER_VERSION__/1000   % 1000)
++# define COMPILER_VERSION_PATCH DEC(__TI_COMPILER_VERSION__        % 1000)
++
++#elif defined(__FUJITSU) || defined(__FCC_VERSION) || defined(__fcc_version)
++# define COMPILER_ID "Fujitsu"
++
++#elif defined(__TINYC__)
++# define COMPILER_ID "TinyCC"
++
++#elif defined(__BCC__)
++# define COMPILER_ID "Bruce"
++
++#elif defined(__SCO_VERSION__)
++# define COMPILER_ID "SCO"
++
++#elif defined(__clang__) && defined(__apple_build_version__)
++# define COMPILER_ID "AppleClang"
++# if defined(_MSC_VER)
++#  define SIMULATE_ID "MSVC"
++# endif
++# define COMPILER_VERSION_MAJOR DEC(__clang_major__)
++# define COMPILER_VERSION_MINOR DEC(__clang_minor__)
++# define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)
++# if defined(_MSC_VER)
++   /* _MSC_VER = VVRR */
++#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
++#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
++# endif
++# define COMPILER_VERSION_TWEAK DEC(__apple_build_version__)
++
++#elif defined(__clang__)
++# define COMPILER_ID "Clang"
++# if defined(_MSC_VER)
++#  define SIMULATE_ID "MSVC"
++# endif
++# define COMPILER_VERSION_MAJOR DEC(__clang_major__)
++# define COMPILER_VERSION_MINOR DEC(__clang_minor__)
++# define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)
++# if defined(_MSC_VER)
++   /* _MSC_VER = VVRR */
++#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
++#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
++# endif
++
++#elif defined(__GNUC__)
++# define COMPILER_ID "GNU"
++# define COMPILER_VERSION_MAJOR DEC(__GNUC__)
++# if defined(__GNUC_MINOR__)
++#  define COMPILER_VERSION_MINOR DEC(__GNUC_MINOR__)
++# endif
++# if defined(__GNUC_PATCHLEVEL__)
++#  define COMPILER_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
++# endif
++
++#elif defined(_MSC_VER)
++# define COMPILER_ID "MSVC"
++  /* _MSC_VER = VVRR */
++# define COMPILER_VERSION_MAJOR DEC(_MSC_VER / 100)
++# define COMPILER_VERSION_MINOR DEC(_MSC_VER % 100)
++# if defined(_MSC_FULL_VER)
++#  if _MSC_VER >= 1400
++    /* _MSC_FULL_VER = VVRRPPPPP */
++#   define COMPILER_VERSION_PATCH DEC(_MSC_FULL_VER % 100000)
++#  else
++    /* _MSC_FULL_VER = VVRRPPPP */
++#   define COMPILER_VERSION_PATCH DEC(_MSC_FULL_VER % 10000)
++#  endif
++# endif
++# if defined(_MSC_BUILD)
++#  define COMPILER_VERSION_TWEAK DEC(_MSC_BUILD)
++# endif
++
++#elif defined(__VISUALDSPVERSION__) || defined(__ADSPBLACKFIN__) || defined(__ADSPTS__) || defined(__ADSP21000__)
++# define COMPILER_ID "ADSP"
++#if defined(__VISUALDSPVERSION__)
++  /* __VISUALDSPVERSION__ = 0xVVRRPP00 */
++# define COMPILER_VERSION_MAJOR HEX(__VISUALDSPVERSION__>>24)
++# define COMPILER_VERSION_MINOR HEX(__VISUALDSPVERSION__>>16 & 0xFF)
++# define COMPILER_VERSION_PATCH HEX(__VISUALDSPVERSION__>>8  & 0xFF)
++#endif
++
++#elif defined(__IAR_SYSTEMS_ICC__) || defined(__IAR_SYSTEMS_ICC)
++# define COMPILER_ID "IAR"
++# if defined(__VER__)
++#  define COMPILER_VERSION_MAJOR DEC((__VER__) / 1000000)
++#  define COMPILER_VERSION_MINOR DEC(((__VER__) / 1000) % 1000)
++#  define COMPILER_VERSION_PATCH DEC((__VER__) % 1000)
++#  define COMPILER_VERSION_INTERNAL DEC(__IAR_SYSTEMS_ICC__)
++# endif
++
++#elif defined(__ARMCC_VERSION)
++# define COMPILER_ID "ARMCC"
++#if __ARMCC_VERSION >= 1000000
++  /* __ARMCC_VERSION = VRRPPPP */
++  # define COMPILER_VERSION_MAJOR DEC(__ARMCC_VERSION/1000000)
++  # define COMPILER_VERSION_MINOR DEC(__ARMCC_VERSION/10000 % 100)
++  # define COMPILER_VERSION_PATCH DEC(__ARMCC_VERSION     % 10000)
++#else
++  /* __ARMCC_VERSION = VRPPPP */
++  # define COMPILER_VERSION_MAJOR DEC(__ARMCC_VERSION/100000)
++  # define COMPILER_VERSION_MINOR DEC(__ARMCC_VERSION/10000 % 10)
++  # define COMPILER_VERSION_PATCH DEC(__ARMCC_VERSION    % 10000)
++#endif
++
++
++#elif defined(__SDCC_VERSION_MAJOR) || defined(SDCC)
++# define COMPILER_ID "SDCC"
++# if defined(__SDCC_VERSION_MAJOR)
++#  define COMPILER_VERSION_MAJOR DEC(__SDCC_VERSION_MAJOR)
++#  define COMPILER_VERSION_MINOR DEC(__SDCC_VERSION_MINOR)
++#  define COMPILER_VERSION_PATCH DEC(__SDCC_VERSION_PATCH)
++# else
++  /* SDCC = VRP */
++#  define COMPILER_VERSION_MAJOR DEC(SDCC/100)
++#  define COMPILER_VERSION_MINOR DEC(SDCC/10 % 10)
++#  define COMPILER_VERSION_PATCH DEC(SDCC    % 10)
++# endif
++
++#elif defined(_SGI_COMPILER_VERSION) || defined(_COMPILER_VERSION)
++# define COMPILER_ID "MIPSpro"
++# if defined(_SGI_COMPILER_VERSION)
++  /* _SGI_COMPILER_VERSION = VRP */
++#  define COMPILER_VERSION_MAJOR DEC(_SGI_COMPILER_VERSION/100)
++#  define COMPILER_VERSION_MINOR DEC(_SGI_COMPILER_VERSION/10 % 10)
++#  define COMPILER_VERSION_PATCH DEC(_SGI_COMPILER_VERSION    % 10)
++# else
++  /* _COMPILER_VERSION = VRP */
++#  define COMPILER_VERSION_MAJOR DEC(_COMPILER_VERSION/100)
++#  define COMPILER_VERSION_MINOR DEC(_COMPILER_VERSION/10 % 10)
++#  define COMPILER_VERSION_PATCH DEC(_COMPILER_VERSION    % 10)
++# endif
++
++
++/* These compilers are either not known or too old to define an
++  identification macro.  Try to identify the platform and guess that
++  it is the native compiler.  */
++#elif defined(__sgi)
++# define COMPILER_ID "MIPSpro"
++
++#elif defined(__hpux) || defined(__hpua)
++# define COMPILER_ID "HP"
++
++#else /* unknown compiler */
++# define COMPILER_ID ""
++#endif
++
++/* Construct the string literal in pieces to prevent the source from
++   getting matched.  Store it in a pointer rather than an array
++   because some compilers will just produce instructions to fill the
++   array rather than assigning a pointer to a static array.  */
++char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";
++#ifdef SIMULATE_ID
++char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
++#endif
++
++#ifdef __QNXNTO__
++char const* qnxnto = "INFO" ":" "qnxnto[]";
++#endif
++
++#if defined(__CRAYXE) || defined(__CRAYXC)
++char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
++#endif
++
++#define STRINGIFY_HELPER(X) #X
++#define STRINGIFY(X) STRINGIFY_HELPER(X)
++
++/* Identify known platforms by name.  */
++#if defined(__linux) || defined(__linux__) || defined(linux)
++# define PLATFORM_ID "Linux"
++
++#elif defined(__CYGWIN__)
++# define PLATFORM_ID "Cygwin"
++
++#elif defined(__MINGW32__)
++# define PLATFORM_ID "MinGW"
++
++#elif defined(__APPLE__)
++# define PLATFORM_ID "Darwin"
++
++#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
++# define PLATFORM_ID "Windows"
++
++#elif defined(__FreeBSD__) || defined(__FreeBSD)
++# define PLATFORM_ID "FreeBSD"
++
++#elif defined(__NetBSD__) || defined(__NetBSD)
++# define PLATFORM_ID "NetBSD"
++
++#elif defined(__OpenBSD__) || defined(__OPENBSD)
++# define PLATFORM_ID "OpenBSD"
++
++#elif defined(__sun) || defined(sun)
++# define PLATFORM_ID "SunOS"
++
++#elif defined(_AIX) || defined(__AIX) || defined(__AIX__) || defined(__aix) || defined(__aix__)
++# define PLATFORM_ID "AIX"
++
++#elif defined(__sgi) || defined(__sgi__) || defined(_SGI)
++# define PLATFORM_ID "IRIX"
++
++#elif defined(__hpux) || defined(__hpux__)
++# define PLATFORM_ID "HP-UX"
++
++#elif defined(__HAIKU__)
++# define PLATFORM_ID "Haiku"
++
++#elif defined(__BeOS) || defined(__BEOS__) || defined(_BEOS)
++# define PLATFORM_ID "BeOS"
++
++#elif defined(__QNX__) || defined(__QNXNTO__)
++# define PLATFORM_ID "QNX"
++
++#elif defined(__tru64) || defined(_tru64) || defined(__TRU64__)
++# define PLATFORM_ID "Tru64"
++
++#elif defined(__riscos) || defined(__riscos__)
++# define PLATFORM_ID "RISCos"
++
++#elif defined(__sinix) || defined(__sinix__) || defined(__SINIX__)
++# define PLATFORM_ID "SINIX"
++
++#elif defined(__UNIX_SV__)
++# define PLATFORM_ID "UNIX_SV"
++
++#elif defined(__bsdos__)
++# define PLATFORM_ID "BSDOS"
++
++#elif defined(_MPRAS) || defined(MPRAS)
++# define PLATFORM_ID "MP-RAS"
++
++#elif defined(__osf) || defined(__osf__)
++# define PLATFORM_ID "OSF1"
++
++#elif defined(_SCO_SV) || defined(SCO_SV) || defined(sco_sv)
++# define PLATFORM_ID "SCO_SV"
++
++#elif defined(__ultrix) || defined(__ultrix__) || defined(_ULTRIX)
++# define PLATFORM_ID "ULTRIX"
++
++#elif defined(__XENIX__) || defined(_XENIX) || defined(XENIX)
++# define PLATFORM_ID "Xenix"
++
++#elif defined(__WATCOMC__)
++# if defined(__LINUX__)
++#  define PLATFORM_ID "Linux"
++
++# elif defined(__DOS__)
++#  define PLATFORM_ID "DOS"
++
++# elif defined(__OS2__)
++#  define PLATFORM_ID "OS2"
++
++# elif defined(__WINDOWS__)
++#  define PLATFORM_ID "Windows3x"
++
++# else /* unknown platform */
++#  define PLATFORM_ID
++# endif
++
++#else /* unknown platform */
++# define PLATFORM_ID
++
++#endif
++
++/* For windows compilers MSVC and Intel we can determine
++   the architecture of the compiler being used.  This is because
++   the compilers do not have flags that can change the architecture,
++   but rather depend on which compiler is being used
++*/
++#if defined(_WIN32) && defined(_MSC_VER)
++# if defined(_M_IA64)
++#  define ARCHITECTURE_ID "IA64"
++
++# elif defined(_M_X64) || defined(_M_AMD64)
++#  define ARCHITECTURE_ID "x64"
++
++# elif defined(_M_IX86)
++#  define ARCHITECTURE_ID "X86"
++
++# elif defined(_M_ARM64)
++#  define ARCHITECTURE_ID "ARM64"
++
++# elif defined(_M_ARM)
++#  if _M_ARM == 4
++#   define ARCHITECTURE_ID "ARMV4I"
++#  elif _M_ARM == 5
++#   define ARCHITECTURE_ID "ARMV5I"
++#  else
++#   define ARCHITECTURE_ID "ARMV" STRINGIFY(_M_ARM)
++#  endif
++
++# elif defined(_M_MIPS)
++#  define ARCHITECTURE_ID "MIPS"
++
++# elif defined(_M_SH)
++#  define ARCHITECTURE_ID "SHx"
++
++# else /* unknown architecture */
++#  define ARCHITECTURE_ID ""
++# endif
++
++#elif defined(__WATCOMC__)
++# if defined(_M_I86)
++#  define ARCHITECTURE_ID "I86"
++
++# elif defined(_M_IX86)
++#  define ARCHITECTURE_ID "X86"
++
++# else /* unknown architecture */
++#  define ARCHITECTURE_ID ""
++# endif
++
++#elif defined(__IAR_SYSTEMS_ICC__) || defined(__IAR_SYSTEMS_ICC)
++# if defined(__ICCARM__)
++#  define ARCHITECTURE_ID "ARM"
++
++# elif defined(__ICCAVR__)
++#  define ARCHITECTURE_ID "AVR"
++
++# else /* unknown architecture */
++#  define ARCHITECTURE_ID ""
++# endif
++#else
++#  define ARCHITECTURE_ID
++#endif
++
++/* Convert integer to decimal digit literals.  */
++#define DEC(n)                   \
++  ('0' + (((n) / 10000000)%10)), \
++  ('0' + (((n) / 1000000)%10)),  \
++  ('0' + (((n) / 100000)%10)),   \
++  ('0' + (((n) / 10000)%10)),    \
++  ('0' + (((n) / 1000)%10)),     \
++  ('0' + (((n) / 100)%10)),      \
++  ('0' + (((n) / 10)%10)),       \
++  ('0' +  ((n) % 10))
++
++/* Convert integer to hex digit literals.  */
++#define HEX(n)             \
++  ('0' + ((n)>>28 & 0xF)), \
++  ('0' + ((n)>>24 & 0xF)), \
++  ('0' + ((n)>>20 & 0xF)), \
++  ('0' + ((n)>>16 & 0xF)), \
++  ('0' + ((n)>>12 & 0xF)), \
++  ('0' + ((n)>>8  & 0xF)), \
++  ('0' + ((n)>>4  & 0xF)), \
++  ('0' + ((n)     & 0xF))
++
++/* Construct a string literal encoding the version number components. */
++#ifdef COMPILER_VERSION_MAJOR
++char const info_version[] = {
++  'I', 'N', 'F', 'O', ':',
++  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','[',
++  COMPILER_VERSION_MAJOR,
++# ifdef COMPILER_VERSION_MINOR
++  '.', COMPILER_VERSION_MINOR,
++#  ifdef COMPILER_VERSION_PATCH
++   '.', COMPILER_VERSION_PATCH,
++#   ifdef COMPILER_VERSION_TWEAK
++    '.', COMPILER_VERSION_TWEAK,
++#   endif
++#  endif
++# endif
++  ']','\0'};
++#endif
++
++/* Construct a string literal encoding the internal version number. */
++#ifdef COMPILER_VERSION_INTERNAL
++char const info_version_internal[] = {
++  'I', 'N', 'F', 'O', ':',
++  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','_',
++  'i','n','t','e','r','n','a','l','[',
++  COMPILER_VERSION_INTERNAL,']','\0'};
++#endif
++
++/* Construct a string literal encoding the version number components. */
++#ifdef SIMULATE_VERSION_MAJOR
++char const info_simulate_version[] = {
++  'I', 'N', 'F', 'O', ':',
++  's','i','m','u','l','a','t','e','_','v','e','r','s','i','o','n','[',
++  SIMULATE_VERSION_MAJOR,
++# ifdef SIMULATE_VERSION_MINOR
++  '.', SIMULATE_VERSION_MINOR,
++#  ifdef SIMULATE_VERSION_PATCH
++   '.', SIMULATE_VERSION_PATCH,
++#   ifdef SIMULATE_VERSION_TWEAK
++    '.', SIMULATE_VERSION_TWEAK,
++#   endif
++#  endif
++# endif
++  ']','\0'};
++#endif
++
++/* Construct the string literal in pieces to prevent the source from
++   getting matched.  Store it in a pointer rather than an array
++   because some compilers will just produce instructions to fill the
++   array rather than assigning a pointer to a static array.  */
++char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
++char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
++
++
++
++
++#if !defined(__STDC__)
++# if defined(_MSC_VER) && !defined(__clang__)
++#  define C_DIALECT "90"
++# else
++#  define C_DIALECT
++# endif
++#elif __STDC_VERSION__ >= 201000L
++# define C_DIALECT "11"
++#elif __STDC_VERSION__ >= 199901L
++# define C_DIALECT "99"
++#else
++# define C_DIALECT "90"
++#endif
++const char* info_language_dialect_default =
++  "INFO" ":" "dialect_default[" C_DIALECT "]";
++
++/*--------------------------------------------------------------------------*/
++
++#ifdef ID_VOID_MAIN
++void main() {}
++#else
++# if defined(__CLASSIC_C__)
++int main(argc, argv) int argc; char *argv[];
++# else
++int main(int argc, char* argv[])
++# endif
++{
++  int require = 0;
++  require += info_compiler[argc];
++  require += info_platform[argc];
++  require += info_arch[argc];
++#ifdef COMPILER_VERSION_MAJOR
++  require += info_version[argc];
++#endif
++#ifdef COMPILER_VERSION_INTERNAL
++  require += info_version_internal[argc];
++#endif
++#ifdef SIMULATE_ID
++  require += info_simulate[argc];
++#endif
++#ifdef SIMULATE_VERSION_MAJOR
++  require += info_simulate_version[argc];
++#endif
++#if defined(__CRAYXE) || defined(__CRAYXC)
++  require += info_cray[argc];
++#endif
++  require += info_language_dialect_default[argc];
++  (void)argv;
++  return require;
++}
++#endif
+diff -Nru -X exclude-ext ike.orig/CMakeFiles/3.10.2/CompilerIdCXX/CMakeCXXCompilerId.cpp ike/CMakeFiles/3.10.2/CompilerIdCXX/CMakeCXXCompilerId.cpp
+--- ike.orig/CMakeFiles/3.10.2/CompilerIdCXX/CMakeCXXCompilerId.cpp	1970-01-01 01:00:00.000000000 +0100
++++ ike/CMakeFiles/3.10.2/CompilerIdCXX/CMakeCXXCompilerId.cpp	2019-01-14 13:25:29.584292341 +0100
+@@ -0,0 +1,576 @@
++/* This source file must have a .cpp extension so that all C++ compilers
++   recognize the extension without flags.  Borland does not know .cxx for
++   example.  */
++#ifndef __cplusplus
++# error "A C compiler has been selected for C++."
++#endif
++
++
++/* Version number components: V=Version, R=Revision, P=Patch
++   Version date components:   YYYY=Year, MM=Month,   DD=Day  */
++
++#if defined(__COMO__)
++# define COMPILER_ID "Comeau"
++  /* __COMO_VERSION__ = VRR */
++# define COMPILER_VERSION_MAJOR DEC(__COMO_VERSION__ / 100)
++# define COMPILER_VERSION_MINOR DEC(__COMO_VERSION__ % 100)
++
++#elif defined(__INTEL_COMPILER) || defined(__ICC)
++# define COMPILER_ID "Intel"
++# if defined(_MSC_VER)
++#  define SIMULATE_ID "MSVC"
++# endif
++  /* __INTEL_COMPILER = VRP */
++# define COMPILER_VERSION_MAJOR DEC(__INTEL_COMPILER/100)
++# define COMPILER_VERSION_MINOR DEC(__INTEL_COMPILER/10 % 10)
++# if defined(__INTEL_COMPILER_UPDATE)
++#  define COMPILER_VERSION_PATCH DEC(__INTEL_COMPILER_UPDATE)
++# else
++#  define COMPILER_VERSION_PATCH DEC(__INTEL_COMPILER   % 10)
++# endif
++# if defined(__INTEL_COMPILER_BUILD_DATE)
++  /* __INTEL_COMPILER_BUILD_DATE = YYYYMMDD */
++#  define COMPILER_VERSION_TWEAK DEC(__INTEL_COMPILER_BUILD_DATE)
++# endif
++# if defined(_MSC_VER)
++   /* _MSC_VER = VVRR */
++#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
++#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
++# endif
++
++#elif defined(__PATHCC__)
++# define COMPILER_ID "PathScale"
++# define COMPILER_VERSION_MAJOR DEC(__PATHCC__)
++# define COMPILER_VERSION_MINOR DEC(__PATHCC_MINOR__)
++# if defined(__PATHCC_PATCHLEVEL__)
++#  define COMPILER_VERSION_PATCH DEC(__PATHCC_PATCHLEVEL__)
++# endif
++
++#elif defined(__BORLANDC__) && defined(__CODEGEARC_VERSION__)
++# define COMPILER_ID "Embarcadero"
++# define COMPILER_VERSION_MAJOR HEX(__CODEGEARC_VERSION__>>24 & 0x00FF)
++# define COMPILER_VERSION_MINOR HEX(__CODEGEARC_VERSION__>>16 & 0x00FF)
++# define COMPILER_VERSION_PATCH DEC(__CODEGEARC_VERSION__     & 0xFFFF)
++
++#elif defined(__BORLANDC__)
++# define COMPILER_ID "Borland"
++  /* __BORLANDC__ = 0xVRR */
++# define COMPILER_VERSION_MAJOR HEX(__BORLANDC__>>8)
++# define COMPILER_VERSION_MINOR HEX(__BORLANDC__ & 0xFF)
++
++#elif defined(__WATCOMC__) && __WATCOMC__ < 1200
++# define COMPILER_ID "Watcom"
++   /* __WATCOMC__ = VVRR */
++# define COMPILER_VERSION_MAJOR DEC(__WATCOMC__ / 100)
++# define COMPILER_VERSION_MINOR DEC((__WATCOMC__ / 10) % 10)
++# if (__WATCOMC__ % 10) > 0
++#  define COMPILER_VERSION_PATCH DEC(__WATCOMC__ % 10)
++# endif
++
++#elif defined(__WATCOMC__)
++# define COMPILER_ID "OpenWatcom"
++   /* __WATCOMC__ = VVRP + 1100 */
++# define COMPILER_VERSION_MAJOR DEC((__WATCOMC__ - 1100) / 100)
++# define COMPILER_VERSION_MINOR DEC((__WATCOMC__ / 10) % 10)
++# if (__WATCOMC__ % 10) > 0
++#  define COMPILER_VERSION_PATCH DEC(__WATCOMC__ % 10)
++# endif
++
++#elif defined(__SUNPRO_CC)
++# define COMPILER_ID "SunPro"
++# if __SUNPRO_CC >= 0x5100
++   /* __SUNPRO_CC = 0xVRRP */
++#  define COMPILER_VERSION_MAJOR HEX(__SUNPRO_CC>>12)
++#  define COMPILER_VERSION_MINOR HEX(__SUNPRO_CC>>4 & 0xFF)
++#  define COMPILER_VERSION_PATCH HEX(__SUNPRO_CC    & 0xF)
++# else
++   /* __SUNPRO_CC = 0xVRP */
++#  define COMPILER_VERSION_MAJOR HEX(__SUNPRO_CC>>8)
++#  define COMPILER_VERSION_MINOR HEX(__SUNPRO_CC>>4 & 0xF)
++#  define COMPILER_VERSION_PATCH HEX(__SUNPRO_CC    & 0xF)
++# endif
++
++#elif defined(__HP_aCC)
++# define COMPILER_ID "HP"
++  /* __HP_aCC = VVRRPP */
++# define COMPILER_VERSION_MAJOR DEC(__HP_aCC/10000)
++# define COMPILER_VERSION_MINOR DEC(__HP_aCC/100 % 100)
++# define COMPILER_VERSION_PATCH DEC(__HP_aCC     % 100)
++
++#elif defined(__DECCXX)
++# define COMPILER_ID "Compaq"
++  /* __DECCXX_VER = VVRRTPPPP */
++# define COMPILER_VERSION_MAJOR DEC(__DECCXX_VER/10000000)
++# define COMPILER_VERSION_MINOR DEC(__DECCXX_VER/100000  % 100)
++# define COMPILER_VERSION_PATCH DEC(__DECCXX_VER         % 10000)
++
++#elif defined(__IBMCPP__) && defined(__COMPILER_VER__)
++# define COMPILER_ID "zOS"
++  /* __IBMCPP__ = VRP */
++# define COMPILER_VERSION_MAJOR DEC(__IBMCPP__/100)
++# define COMPILER_VERSION_MINOR DEC(__IBMCPP__/10 % 10)
++# define COMPILER_VERSION_PATCH DEC(__IBMCPP__    % 10)
++
++#elif defined(__IBMCPP__) && !defined(__COMPILER_VER__) && __IBMCPP__ >= 800
++# define COMPILER_ID "XL"
++  /* __IBMCPP__ = VRP */
++# define COMPILER_VERSION_MAJOR DEC(__IBMCPP__/100)
++# define COMPILER_VERSION_MINOR DEC(__IBMCPP__/10 % 10)
++# define COMPILER_VERSION_PATCH DEC(__IBMCPP__    % 10)
++
++#elif defined(__IBMCPP__) && !defined(__COMPILER_VER__) && __IBMCPP__ < 800
++# define COMPILER_ID "VisualAge"
++  /* __IBMCPP__ = VRP */
++# define COMPILER_VERSION_MAJOR DEC(__IBMCPP__/100)
++# define COMPILER_VERSION_MINOR DEC(__IBMCPP__/10 % 10)
++# define COMPILER_VERSION_PATCH DEC(__IBMCPP__    % 10)
++
++#elif defined(__PGI)
++# define COMPILER_ID "PGI"
++# define COMPILER_VERSION_MAJOR DEC(__PGIC__)
++# define COMPILER_VERSION_MINOR DEC(__PGIC_MINOR__)
++# if defined(__PGIC_PATCHLEVEL__)
++#  define COMPILER_VERSION_PATCH DEC(__PGIC_PATCHLEVEL__)
++# endif
++
++#elif defined(_CRAYC)
++# define COMPILER_ID "Cray"
++# define COMPILER_VERSION_MAJOR DEC(_RELEASE_MAJOR)
++# define COMPILER_VERSION_MINOR DEC(_RELEASE_MINOR)
++
++#elif defined(__TI_COMPILER_VERSION__)
++# define COMPILER_ID "TI"
++  /* __TI_COMPILER_VERSION__ = VVVRRRPPP */
++# define COMPILER_VERSION_MAJOR DEC(__TI_COMPILER_VERSION__/1000000)
++# define COMPILER_VERSION_MINOR DEC(__TI_COMPILER_VERSION__/1000   % 1000)
++# define COMPILER_VERSION_PATCH DEC(__TI_COMPILER_VERSION__        % 1000)
++
++#elif defined(__FUJITSU) || defined(__FCC_VERSION) || defined(__fcc_version)
++# define COMPILER_ID "Fujitsu"
++
++#elif defined(__SCO_VERSION__)
++# define COMPILER_ID "SCO"
++
++#elif defined(__clang__) && defined(__apple_build_version__)
++# define COMPILER_ID "AppleClang"
++# if defined(_MSC_VER)
++#  define SIMULATE_ID "MSVC"
++# endif
++# define COMPILER_VERSION_MAJOR DEC(__clang_major__)
++# define COMPILER_VERSION_MINOR DEC(__clang_minor__)
++# define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)
++# if defined(_MSC_VER)
++   /* _MSC_VER = VVRR */
++#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
++#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
++# endif
++# define COMPILER_VERSION_TWEAK DEC(__apple_build_version__)
++
++#elif defined(__clang__)
++# define COMPILER_ID "Clang"
++# if defined(_MSC_VER)
++#  define SIMULATE_ID "MSVC"
++# endif
++# define COMPILER_VERSION_MAJOR DEC(__clang_major__)
++# define COMPILER_VERSION_MINOR DEC(__clang_minor__)
++# define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)
++# if defined(_MSC_VER)
++   /* _MSC_VER = VVRR */
++#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
++#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
++# endif
++
++#elif defined(__GNUC__) || defined(__GNUG__)
++# define COMPILER_ID "GNU"
++# if defined(__GNUC__)
++#  define COMPILER_VERSION_MAJOR DEC(__GNUC__)
++# else
++#  define COMPILER_VERSION_MAJOR DEC(__GNUG__)
++# endif
++# if defined(__GNUC_MINOR__)
++#  define COMPILER_VERSION_MINOR DEC(__GNUC_MINOR__)
++# endif
++# if defined(__GNUC_PATCHLEVEL__)
++#  define COMPILER_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
++# endif
++
++#elif defined(_MSC_VER)
++# define COMPILER_ID "MSVC"
++  /* _MSC_VER = VVRR */
++# define COMPILER_VERSION_MAJOR DEC(_MSC_VER / 100)
++# define COMPILER_VERSION_MINOR DEC(_MSC_VER % 100)
++# if defined(_MSC_FULL_VER)
++#  if _MSC_VER >= 1400
++    /* _MSC_FULL_VER = VVRRPPPPP */
++#   define COMPILER_VERSION_PATCH DEC(_MSC_FULL_VER % 100000)
++#  else
++    /* _MSC_FULL_VER = VVRRPPPP */
++#   define COMPILER_VERSION_PATCH DEC(_MSC_FULL_VER % 10000)
++#  endif
++# endif
++# if defined(_MSC_BUILD)
++#  define COMPILER_VERSION_TWEAK DEC(_MSC_BUILD)
++# endif
++
++#elif defined(__VISUALDSPVERSION__) || defined(__ADSPBLACKFIN__) || defined(__ADSPTS__) || defined(__ADSP21000__)
++# define COMPILER_ID "ADSP"
++#if defined(__VISUALDSPVERSION__)
++  /* __VISUALDSPVERSION__ = 0xVVRRPP00 */
++# define COMPILER_VERSION_MAJOR HEX(__VISUALDSPVERSION__>>24)
++# define COMPILER_VERSION_MINOR HEX(__VISUALDSPVERSION__>>16 & 0xFF)
++# define COMPILER_VERSION_PATCH HEX(__VISUALDSPVERSION__>>8  & 0xFF)
++#endif
++
++#elif defined(__IAR_SYSTEMS_ICC__) || defined(__IAR_SYSTEMS_ICC)
++# define COMPILER_ID "IAR"
++# if defined(__VER__)
++#  define COMPILER_VERSION_MAJOR DEC((__VER__) / 1000000)
++#  define COMPILER_VERSION_MINOR DEC(((__VER__) / 1000) % 1000)
++#  define COMPILER_VERSION_PATCH DEC((__VER__) % 1000)
++#  define COMPILER_VERSION_INTERNAL DEC(__IAR_SYSTEMS_ICC__)
++# endif
++
++#elif defined(__ARMCC_VERSION)
++# define COMPILER_ID "ARMCC"
++#if __ARMCC_VERSION >= 1000000
++  /* __ARMCC_VERSION = VRRPPPP */
++  # define COMPILER_VERSION_MAJOR DEC(__ARMCC_VERSION/1000000)
++  # define COMPILER_VERSION_MINOR DEC(__ARMCC_VERSION/10000 % 100)
++  # define COMPILER_VERSION_PATCH DEC(__ARMCC_VERSION     % 10000)
++#else
++  /* __ARMCC_VERSION = VRPPPP */
++  # define COMPILER_VERSION_MAJOR DEC(__ARMCC_VERSION/100000)
++  # define COMPILER_VERSION_MINOR DEC(__ARMCC_VERSION/10000 % 10)
++  # define COMPILER_VERSION_PATCH DEC(__ARMCC_VERSION    % 10000)
++#endif
++
++
++#elif defined(_SGI_COMPILER_VERSION) || defined(_COMPILER_VERSION)
++# define COMPILER_ID "MIPSpro"
++# if defined(_SGI_COMPILER_VERSION)
++  /* _SGI_COMPILER_VERSION = VRP */
++#  define COMPILER_VERSION_MAJOR DEC(_SGI_COMPILER_VERSION/100)
++#  define COMPILER_VERSION_MINOR DEC(_SGI_COMPILER_VERSION/10 % 10)
++#  define COMPILER_VERSION_PATCH DEC(_SGI_COMPILER_VERSION    % 10)
++# else
++  /* _COMPILER_VERSION = VRP */
++#  define COMPILER_VERSION_MAJOR DEC(_COMPILER_VERSION/100)
++#  define COMPILER_VERSION_MINOR DEC(_COMPILER_VERSION/10 % 10)
++#  define COMPILER_VERSION_PATCH DEC(_COMPILER_VERSION    % 10)
++# endif
++
++
++/* These compilers are either not known or too old to define an
++  identification macro.  Try to identify the platform and guess that
++  it is the native compiler.  */
++#elif defined(__sgi)
++# define COMPILER_ID "MIPSpro"
++
++#elif defined(__hpux) || defined(__hpua)
++# define COMPILER_ID "HP"
++
++#else /* unknown compiler */
++# define COMPILER_ID ""
++#endif
++
++/* Construct the string literal in pieces to prevent the source from
++   getting matched.  Store it in a pointer rather than an array
++   because some compilers will just produce instructions to fill the
++   array rather than assigning a pointer to a static array.  */
++char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";
++#ifdef SIMULATE_ID
++char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
++#endif
++
++#ifdef __QNXNTO__
++char const* qnxnto = "INFO" ":" "qnxnto[]";
++#endif
++
++#if defined(__CRAYXE) || defined(__CRAYXC)
++char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
++#endif
++
++#define STRINGIFY_HELPER(X) #X
++#define STRINGIFY(X) STRINGIFY_HELPER(X)
++
++/* Identify known platforms by name.  */
++#if defined(__linux) || defined(__linux__) || defined(linux)
++# define PLATFORM_ID "Linux"
++
++#elif defined(__CYGWIN__)
++# define PLATFORM_ID "Cygwin"
++
++#elif defined(__MINGW32__)
++# define PLATFORM_ID "MinGW"
++
++#elif defined(__APPLE__)
++# define PLATFORM_ID "Darwin"
++
++#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
++# define PLATFORM_ID "Windows"
++
++#elif defined(__FreeBSD__) || defined(__FreeBSD)
++# define PLATFORM_ID "FreeBSD"
++
++#elif defined(__NetBSD__) || defined(__NetBSD)
++# define PLATFORM_ID "NetBSD"
++
++#elif defined(__OpenBSD__) || defined(__OPENBSD)
++# define PLATFORM_ID "OpenBSD"
++
++#elif defined(__sun) || defined(sun)
++# define PLATFORM_ID "SunOS"
++
++#elif defined(_AIX) || defined(__AIX) || defined(__AIX__) || defined(__aix) || defined(__aix__)
++# define PLATFORM_ID "AIX"
++
++#elif defined(__sgi) || defined(__sgi__) || defined(_SGI)
++# define PLATFORM_ID "IRIX"
++
++#elif defined(__hpux) || defined(__hpux__)
++# define PLATFORM_ID "HP-UX"
++
++#elif defined(__HAIKU__)
++# define PLATFORM_ID "Haiku"
++
++#elif defined(__BeOS) || defined(__BEOS__) || defined(_BEOS)
++# define PLATFORM_ID "BeOS"
++
++#elif defined(__QNX__) || defined(__QNXNTO__)
++# define PLATFORM_ID "QNX"
++
++#elif defined(__tru64) || defined(_tru64) || defined(__TRU64__)
++# define PLATFORM_ID "Tru64"
++
++#elif defined(__riscos) || defined(__riscos__)
++# define PLATFORM_ID "RISCos"
++
++#elif defined(__sinix) || defined(__sinix__) || defined(__SINIX__)
++# define PLATFORM_ID "SINIX"
++
++#elif defined(__UNIX_SV__)
++# define PLATFORM_ID "UNIX_SV"
++
++#elif defined(__bsdos__)
++# define PLATFORM_ID "BSDOS"
++
++#elif defined(_MPRAS) || defined(MPRAS)
++# define PLATFORM_ID "MP-RAS"
++
++#elif defined(__osf) || defined(__osf__)
++# define PLATFORM_ID "OSF1"
++
++#elif defined(_SCO_SV) || defined(SCO_SV) || defined(sco_sv)
++# define PLATFORM_ID "SCO_SV"
++
++#elif defined(__ultrix) || defined(__ultrix__) || defined(_ULTRIX)
++# define PLATFORM_ID "ULTRIX"
++
++#elif defined(__XENIX__) || defined(_XENIX) || defined(XENIX)
++# define PLATFORM_ID "Xenix"
++
++#elif defined(__WATCOMC__)
++# if defined(__LINUX__)
++#  define PLATFORM_ID "Linux"
++
++# elif defined(__DOS__)
++#  define PLATFORM_ID "DOS"
++
++# elif defined(__OS2__)
++#  define PLATFORM_ID "OS2"
++
++# elif defined(__WINDOWS__)
++#  define PLATFORM_ID "Windows3x"
++
++# else /* unknown platform */
++#  define PLATFORM_ID
++# endif
++
++#else /* unknown platform */
++# define PLATFORM_ID
++
++#endif
++
++/* For windows compilers MSVC and Intel we can determine
++   the architecture of the compiler being used.  This is because
++   the compilers do not have flags that can change the architecture,
++   but rather depend on which compiler is being used
++*/
++#if defined(_WIN32) && defined(_MSC_VER)
++# if defined(_M_IA64)
++#  define ARCHITECTURE_ID "IA64"
++
++# elif defined(_M_X64) || defined(_M_AMD64)
++#  define ARCHITECTURE_ID "x64"
++
++# elif defined(_M_IX86)
++#  define ARCHITECTURE_ID "X86"
++
++# elif defined(_M_ARM64)
++#  define ARCHITECTURE_ID "ARM64"
++
++# elif defined(_M_ARM)
++#  if _M_ARM == 4
++#   define ARCHITECTURE_ID "ARMV4I"
++#  elif _M_ARM == 5
++#   define ARCHITECTURE_ID "ARMV5I"
++#  else
++#   define ARCHITECTURE_ID "ARMV" STRINGIFY(_M_ARM)
++#  endif
++
++# elif defined(_M_MIPS)
++#  define ARCHITECTURE_ID "MIPS"
++
++# elif defined(_M_SH)
++#  define ARCHITECTURE_ID "SHx"
++
++# else /* unknown architecture */
++#  define ARCHITECTURE_ID ""
++# endif
++
++#elif defined(__WATCOMC__)
++# if defined(_M_I86)
++#  define ARCHITECTURE_ID "I86"
++
++# elif defined(_M_IX86)
++#  define ARCHITECTURE_ID "X86"
++
++# else /* unknown architecture */
++#  define ARCHITECTURE_ID ""
++# endif
++
++#elif defined(__IAR_SYSTEMS_ICC__) || defined(__IAR_SYSTEMS_ICC)
++# if defined(__ICCARM__)
++#  define ARCHITECTURE_ID "ARM"
++
++# elif defined(__ICCAVR__)
++#  define ARCHITECTURE_ID "AVR"
++
++# else /* unknown architecture */
++#  define ARCHITECTURE_ID ""
++# endif
++#else
++#  define ARCHITECTURE_ID
++#endif
++
++/* Convert integer to decimal digit literals.  */
++#define DEC(n)                   \
++  ('0' + (((n) / 10000000)%10)), \
++  ('0' + (((n) / 1000000)%10)),  \
++  ('0' + (((n) / 100000)%10)),   \
++  ('0' + (((n) / 10000)%10)),    \
++  ('0' + (((n) / 1000)%10)),     \
++  ('0' + (((n) / 100)%10)),      \
++  ('0' + (((n) / 10)%10)),       \
++  ('0' +  ((n) % 10))
++
++/* Convert integer to hex digit literals.  */
++#define HEX(n)             \
++  ('0' + ((n)>>28 & 0xF)), \
++  ('0' + ((n)>>24 & 0xF)), \
++  ('0' + ((n)>>20 & 0xF)), \
++  ('0' + ((n)>>16 & 0xF)), \
++  ('0' + ((n)>>12 & 0xF)), \
++  ('0' + ((n)>>8  & 0xF)), \
++  ('0' + ((n)>>4  & 0xF)), \
++  ('0' + ((n)     & 0xF))
++
++/* Construct a string literal encoding the version number components. */
++#ifdef COMPILER_VERSION_MAJOR
++char const info_version[] = {
++  'I', 'N', 'F', 'O', ':',
++  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','[',
++  COMPILER_VERSION_MAJOR,
++# ifdef COMPILER_VERSION_MINOR
++  '.', COMPILER_VERSION_MINOR,
++#  ifdef COMPILER_VERSION_PATCH
++   '.', COMPILER_VERSION_PATCH,
++#   ifdef COMPILER_VERSION_TWEAK
++    '.', COMPILER_VERSION_TWEAK,
++#   endif
++#  endif
++# endif
++  ']','\0'};
++#endif
++
++/* Construct a string literal encoding the internal version number. */
++#ifdef COMPILER_VERSION_INTERNAL
++char const info_version_internal[] = {
++  'I', 'N', 'F', 'O', ':',
++  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','_',
++  'i','n','t','e','r','n','a','l','[',
++  COMPILER_VERSION_INTERNAL,']','\0'};
++#endif
++
++/* Construct a string literal encoding the version number components. */
++#ifdef SIMULATE_VERSION_MAJOR
++char const info_simulate_version[] = {
++  'I', 'N', 'F', 'O', ':',
++  's','i','m','u','l','a','t','e','_','v','e','r','s','i','o','n','[',
++  SIMULATE_VERSION_MAJOR,
++# ifdef SIMULATE_VERSION_MINOR
++  '.', SIMULATE_VERSION_MINOR,
++#  ifdef SIMULATE_VERSION_PATCH
++   '.', SIMULATE_VERSION_PATCH,
++#   ifdef SIMULATE_VERSION_TWEAK
++    '.', SIMULATE_VERSION_TWEAK,
++#   endif
++#  endif
++# endif
++  ']','\0'};
++#endif
++
++/* Construct the string literal in pieces to prevent the source from
++   getting matched.  Store it in a pointer rather than an array
++   because some compilers will just produce instructions to fill the
++   array rather than assigning a pointer to a static array.  */
++char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
++char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
++
++
++
++
++#if defined(_MSC_VER) && defined(_MSVC_LANG)
++#define CXX_STD _MSVC_LANG
++#else
++#define CXX_STD __cplusplus
++#endif
++
++const char* info_language_dialect_default = "INFO" ":" "dialect_default["
++#if CXX_STD > 201402L
++  "17"
++#elif CXX_STD >= 201402L
++  "14"
++#elif CXX_STD >= 201103L
++  "11"
++#else
++  "98"
++#endif
++"]";
++
++/*--------------------------------------------------------------------------*/
++
++int main(int argc, char* argv[])
++{
++  int require = 0;
++  require += info_compiler[argc];
++  require += info_platform[argc];
++#ifdef COMPILER_VERSION_MAJOR
++  require += info_version[argc];
++#endif
++#ifdef COMPILER_VERSION_INTERNAL
++  require += info_version_internal[argc];
++#endif
++#ifdef SIMULATE_ID
++  require += info_simulate[argc];
++#endif
++#ifdef SIMULATE_VERSION_MAJOR
++  require += info_simulate_version[argc];
++#endif
++#if defined(__CRAYXE) || defined(__CRAYXC)
++  require += info_cray[argc];
++#endif
++  require += info_language_dialect_default[argc];
++  (void)argv;
++  return require;
++}
+diff -Nru -X exclude-ext ike.orig/CMakeFiles/cmake.check_cache ike/CMakeFiles/cmake.check_cache
+--- ike.orig/CMakeFiles/cmake.check_cache	1970-01-01 01:00:00.000000000 +0100
++++ ike/CMakeFiles/cmake.check_cache	2019-01-15 13:39:29.837738309 +0100
+@@ -0,0 +1 @@
++# This file is generated by cmake for dependency checking of the CMakeCache.txt file
+diff -Nru -X exclude-ext ike.orig/CMakeFiles/CMakeOutput.log ike/CMakeFiles/CMakeOutput.log
+--- ike.orig/CMakeFiles/CMakeOutput.log	1970-01-01 01:00:00.000000000 +0100
++++ ike/CMakeFiles/CMakeOutput.log	2019-01-14 13:25:31.336308100 +0100
+@@ -0,0 +1,659 @@
++The system is: Linux - 4.15.0-43-generic - x86_64
++Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
++Compiler: /usr/bin/cc 
++Build flags: 
++Id flags:  
++
++The output was:
++0
++
++
++Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
++
++The C compiler identification is GNU, found in "/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/3.10.2/CompilerIdC/a.out"
++
++Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
++Compiler: /usr/bin/c++ 
++Build flags: 
++Id flags:  
++
++The output was:
++0
++
++
++Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
++
++The CXX compiler identification is GNU, found in "/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/3.10.2/CompilerIdCXX/a.out"
++
++Determining if the C compiler works passed with the following output:
++Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp
++
++Run Build Command:"/usr/bin/make" "cmTC_cfac8/fast"
++make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++/usr/bin/make -f CMakeFiles/cmTC_cfac8.dir/build.make CMakeFiles/cmTC_cfac8.dir/build
++make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++Building C object CMakeFiles/cmTC_cfac8.dir/testCCompiler.c.o
++/usr/bin/cc    -o CMakeFiles/cmTC_cfac8.dir/testCCompiler.c.o   -c /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp/testCCompiler.c
++Linking C executable cmTC_cfac8
++/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cfac8.dir/link.txt --verbose=1
++/usr/bin/cc      -rdynamic CMakeFiles/cmTC_cfac8.dir/testCCompiler.c.o  -o cmTC_cfac8 
++make[2]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++make[1]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++
++
++Detecting C compiler ABI info compiled with the following output:
++Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp
++
++Run Build Command:"/usr/bin/make" "cmTC_bb470/fast"
++make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++/usr/bin/make -f CMakeFiles/cmTC_bb470.dir/build.make CMakeFiles/cmTC_bb470.dir/build
++make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++Building C object CMakeFiles/cmTC_bb470.dir/CMakeCCompilerABI.c.o
++/usr/bin/cc    -o CMakeFiles/cmTC_bb470.dir/CMakeCCompilerABI.c.o   -c /usr/share/cmake-3.10/Modules/CMakeCCompilerABI.c
++Linking C executable cmTC_bb470
++/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bb470.dir/link.txt --verbose=1
++/usr/bin/cc     -v -rdynamic CMakeFiles/cmTC_bb470.dir/CMakeCCompilerABI.c.o  -o cmTC_bb470 
++Using built-in specs.
++COLLECT_GCC=/usr/bin/cc
++COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/7/lto-wrapper
++OFFLOAD_TARGET_NAMES=nvptx-none
++OFFLOAD_TARGET_DEFAULT=1
++Target: x86_64-linux-gnu
++Configured with: ../src/configure -v --with-pkgversion='Ubuntu 7.3.0-27ubuntu1~18.04' --with-bugurl=file:///usr/share/doc/gcc-7/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-7 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
++Thread model: posix
++gcc version 7.3.0 (Ubuntu 7.3.0-27ubuntu1~18.04) 
++COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/
++LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../:/lib/:/usr/lib/
++COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_bb470' '-mtune=generic' '-march=x86-64'
++ /usr/lib/gcc/x86_64-linux-gnu/7/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/7/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/7/lto-wrapper -plugin-opt=-fresolution=/tmp/ccExcgKH.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_bb470 /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/7/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/7 -L/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/7/../../.. CMakeFiles/cmTC_bb470.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/7/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/crtn.o
++COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_bb470' '-mtune=generic' '-march=x86-64'
++make[2]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++make[1]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++
++
++Parsed C implicit link information from above output:
++  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
++  ignore line: [Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp]
++  ignore line: []
++  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_bb470/fast"]
++  ignore line: [make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp']
++  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_bb470.dir/build.make CMakeFiles/cmTC_bb470.dir/build]
++  ignore line: [make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp']
++  ignore line: [Building C object CMakeFiles/cmTC_bb470.dir/CMakeCCompilerABI.c.o]
++  ignore line: [/usr/bin/cc    -o CMakeFiles/cmTC_bb470.dir/CMakeCCompilerABI.c.o   -c /usr/share/cmake-3.10/Modules/CMakeCCompilerABI.c]
++  ignore line: [Linking C executable cmTC_bb470]
++  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bb470.dir/link.txt --verbose=1]
++  ignore line: [/usr/bin/cc     -v -rdynamic CMakeFiles/cmTC_bb470.dir/CMakeCCompilerABI.c.o  -o cmTC_bb470 ]
++  ignore line: [Using built-in specs.]
++  ignore line: [COLLECT_GCC=/usr/bin/cc]
++  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/7/lto-wrapper]
++  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
++  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
++  ignore line: [Target: x86_64-linux-gnu]
++  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 7.3.0-27ubuntu1~18.04' --with-bugurl=file:///usr/share/doc/gcc-7/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-7 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
++  ignore line: [Thread model: posix]
++  ignore line: [gcc version 7.3.0 (Ubuntu 7.3.0-27ubuntu1~18.04) ]
++  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/]
++  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../:/lib/:/usr/lib/]
++  ignore line: [COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_bb470' '-mtune=generic' '-march=x86-64']
++  link line: [ /usr/lib/gcc/x86_64-linux-gnu/7/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/7/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/7/lto-wrapper -plugin-opt=-fresolution=/tmp/ccExcgKH.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_bb470 /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/7/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/7 -L/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/7/../../.. CMakeFiles/cmTC_bb470.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/7/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/crtn.o]
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/collect2] ==> ignore
++    arg [-plugin] ==> ignore
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/liblto_plugin.so] ==> ignore
++    arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/7/lto-wrapper] ==> ignore
++    arg [-plugin-opt=-fresolution=/tmp/ccExcgKH.res] ==> ignore
++    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
++    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
++    arg [-plugin-opt=-pass-through=-lc] ==> ignore
++    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
++    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
++    arg [--sysroot=/] ==> ignore
++    arg [--build-id] ==> ignore
++    arg [--eh-frame-hdr] ==> ignore
++    arg [-m] ==> ignore
++    arg [elf_x86_64] ==> ignore
++    arg [--hash-style=gnu] ==> ignore
++    arg [--as-needed] ==> ignore
++    arg [-export-dynamic] ==> ignore
++    arg [-dynamic-linker] ==> ignore
++    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
++    arg [-pie] ==> ignore
++    arg [-znow] ==> ignore
++    arg [-zrelro] ==> ignore
++    arg [-o] ==> ignore
++    arg [cmTC_bb470] ==> ignore
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/Scrt1.o] ==> ignore
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/crti.o] ==> ignore
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/crtbeginS.o] ==> ignore
++    arg [-L/usr/lib/gcc/x86_64-linux-gnu/7] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/7]
++    arg [-L/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu]
++    arg [-L/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib]
++    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
++    arg [-L/lib/../lib] ==> dir [/lib/../lib]
++    arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
++    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
++    arg [-L/usr/lib/gcc/x86_64-linux-gnu/7/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/7/../../..]
++    arg [CMakeFiles/cmTC_bb470.dir/CMakeCCompilerABI.c.o] ==> ignore
++    arg [-lgcc] ==> lib [gcc]
++    arg [--push-state] ==> ignore
++    arg [--as-needed] ==> ignore
++    arg [-lgcc_s] ==> lib [gcc_s]
++    arg [--pop-state] ==> ignore
++    arg [-lc] ==> lib [c]
++    arg [-lgcc] ==> lib [gcc]
++    arg [--push-state] ==> ignore
++    arg [--as-needed] ==> ignore
++    arg [-lgcc_s] ==> lib [gcc_s]
++    arg [--pop-state] ==> ignore
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/crtendS.o] ==> ignore
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/crtn.o] ==> ignore
++  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/7] ==> [/usr/lib/gcc/x86_64-linux-gnu/7]
++  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
++  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib] ==> [/usr/lib]
++  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
++  collapse library dir [/lib/../lib] ==> [/lib]
++  collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
++  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
++  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/7/../../..] ==> [/usr/lib]
++  implicit libs: [gcc;gcc_s;c;gcc;gcc_s]
++  implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/7;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
++  implicit fwks: []
++
++
++
++
++Detecting C [-std=c11] compiler features compiled with the following output:
++Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp
++
++Run Build Command:"/usr/bin/make" "cmTC_c39a3/fast"
++make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++/usr/bin/make -f CMakeFiles/cmTC_c39a3.dir/build.make CMakeFiles/cmTC_c39a3.dir/build
++make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++Building C object CMakeFiles/cmTC_c39a3.dir/feature_tests.c.o
++/usr/bin/cc   -std=c11 -o CMakeFiles/cmTC_c39a3.dir/feature_tests.c.o   -c /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/feature_tests.c
++Linking C executable cmTC_c39a3
++/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c39a3.dir/link.txt --verbose=1
++/usr/bin/cc      -rdynamic CMakeFiles/cmTC_c39a3.dir/feature_tests.c.o  -o cmTC_c39a3 
++make[2]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++make[1]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++
++
++    Feature record: C_FEATURE:1c_function_prototypes
++    Feature record: C_FEATURE:1c_restrict
++    Feature record: C_FEATURE:1c_static_assert
++    Feature record: C_FEATURE:1c_variadic_macros
++
++
++Detecting C [-std=c99] compiler features compiled with the following output:
++Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp
++
++Run Build Command:"/usr/bin/make" "cmTC_e8e23/fast"
++make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++/usr/bin/make -f CMakeFiles/cmTC_e8e23.dir/build.make CMakeFiles/cmTC_e8e23.dir/build
++make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++Building C object CMakeFiles/cmTC_e8e23.dir/feature_tests.c.o
++/usr/bin/cc   -std=c99 -o CMakeFiles/cmTC_e8e23.dir/feature_tests.c.o   -c /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/feature_tests.c
++Linking C executable cmTC_e8e23
++/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e8e23.dir/link.txt --verbose=1
++/usr/bin/cc      -rdynamic CMakeFiles/cmTC_e8e23.dir/feature_tests.c.o  -o cmTC_e8e23 
++make[2]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++make[1]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++
++
++    Feature record: C_FEATURE:1c_function_prototypes
++    Feature record: C_FEATURE:1c_restrict
++    Feature record: C_FEATURE:0c_static_assert
++    Feature record: C_FEATURE:1c_variadic_macros
++
++
++Detecting C [-std=c90] compiler features compiled with the following output:
++Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp
++
++Run Build Command:"/usr/bin/make" "cmTC_8b43f/fast"
++make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++/usr/bin/make -f CMakeFiles/cmTC_8b43f.dir/build.make CMakeFiles/cmTC_8b43f.dir/build
++make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++Building C object CMakeFiles/cmTC_8b43f.dir/feature_tests.c.o
++/usr/bin/cc   -std=c90 -o CMakeFiles/cmTC_8b43f.dir/feature_tests.c.o   -c /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/feature_tests.c
++Linking C executable cmTC_8b43f
++/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8b43f.dir/link.txt --verbose=1
++/usr/bin/cc      -rdynamic CMakeFiles/cmTC_8b43f.dir/feature_tests.c.o  -o cmTC_8b43f 
++make[2]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++make[1]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++
++
++    Feature record: C_FEATURE:1c_function_prototypes
++    Feature record: C_FEATURE:0c_restrict
++    Feature record: C_FEATURE:0c_static_assert
++    Feature record: C_FEATURE:0c_variadic_macros
++Determining if the CXX compiler works passed with the following output:
++Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp
++
++Run Build Command:"/usr/bin/make" "cmTC_d6e7e/fast"
++make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++/usr/bin/make -f CMakeFiles/cmTC_d6e7e.dir/build.make CMakeFiles/cmTC_d6e7e.dir/build
++make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++Building CXX object CMakeFiles/cmTC_d6e7e.dir/testCXXCompiler.cxx.o
++/usr/bin/c++     -o CMakeFiles/cmTC_d6e7e.dir/testCXXCompiler.cxx.o -c /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
++Linking CXX executable cmTC_d6e7e
++/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d6e7e.dir/link.txt --verbose=1
++/usr/bin/c++       -rdynamic CMakeFiles/cmTC_d6e7e.dir/testCXXCompiler.cxx.o  -o cmTC_d6e7e 
++make[2]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++make[1]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++
++
++Detecting CXX compiler ABI info compiled with the following output:
++Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp
++
++Run Build Command:"/usr/bin/make" "cmTC_17b8c/fast"
++make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++/usr/bin/make -f CMakeFiles/cmTC_17b8c.dir/build.make CMakeFiles/cmTC_17b8c.dir/build
++make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++Building CXX object CMakeFiles/cmTC_17b8c.dir/CMakeCXXCompilerABI.cpp.o
++/usr/bin/c++     -o CMakeFiles/cmTC_17b8c.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.10/Modules/CMakeCXXCompilerABI.cpp
++Linking CXX executable cmTC_17b8c
++/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_17b8c.dir/link.txt --verbose=1
++/usr/bin/c++      -v -rdynamic CMakeFiles/cmTC_17b8c.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_17b8c 
++Using built-in specs.
++COLLECT_GCC=/usr/bin/c++
++COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/7/lto-wrapper
++OFFLOAD_TARGET_NAMES=nvptx-none
++OFFLOAD_TARGET_DEFAULT=1
++Target: x86_64-linux-gnu
++Configured with: ../src/configure -v --with-pkgversion='Ubuntu 7.3.0-27ubuntu1~18.04' --with-bugurl=file:///usr/share/doc/gcc-7/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-7 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
++Thread model: posix
++gcc version 7.3.0 (Ubuntu 7.3.0-27ubuntu1~18.04) 
++COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/
++LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../:/lib/:/usr/lib/
++COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_17b8c' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
++ /usr/lib/gcc/x86_64-linux-gnu/7/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/7/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/7/lto-wrapper -plugin-opt=-fresolution=/tmp/ccW1ifI9.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_17b8c /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/7/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/7 -L/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/7/../../.. CMakeFiles/cmTC_17b8c.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/7/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/crtn.o
++COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_17b8c' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
++make[2]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++make[1]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++
++
++Parsed CXX implicit link information from above output:
++  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
++  ignore line: [Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp]
++  ignore line: []
++  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_17b8c/fast"]
++  ignore line: [make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp']
++  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_17b8c.dir/build.make CMakeFiles/cmTC_17b8c.dir/build]
++  ignore line: [make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp']
++  ignore line: [Building CXX object CMakeFiles/cmTC_17b8c.dir/CMakeCXXCompilerABI.cpp.o]
++  ignore line: [/usr/bin/c++     -o CMakeFiles/cmTC_17b8c.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.10/Modules/CMakeCXXCompilerABI.cpp]
++  ignore line: [Linking CXX executable cmTC_17b8c]
++  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_17b8c.dir/link.txt --verbose=1]
++  ignore line: [/usr/bin/c++      -v -rdynamic CMakeFiles/cmTC_17b8c.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_17b8c ]
++  ignore line: [Using built-in specs.]
++  ignore line: [COLLECT_GCC=/usr/bin/c++]
++  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/7/lto-wrapper]
++  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
++  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
++  ignore line: [Target: x86_64-linux-gnu]
++  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 7.3.0-27ubuntu1~18.04' --with-bugurl=file:///usr/share/doc/gcc-7/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-7 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
++  ignore line: [Thread model: posix]
++  ignore line: [gcc version 7.3.0 (Ubuntu 7.3.0-27ubuntu1~18.04) ]
++  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/]
++  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/7/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/7/../../../:/lib/:/usr/lib/]
++  ignore line: [COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_17b8c' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
++  link line: [ /usr/lib/gcc/x86_64-linux-gnu/7/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/7/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/7/lto-wrapper -plugin-opt=-fresolution=/tmp/ccW1ifI9.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_17b8c /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/7/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/7 -L/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/7/../../.. CMakeFiles/cmTC_17b8c.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/7/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/crtn.o]
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/collect2] ==> ignore
++    arg [-plugin] ==> ignore
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/liblto_plugin.so] ==> ignore
++    arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/7/lto-wrapper] ==> ignore
++    arg [-plugin-opt=-fresolution=/tmp/ccW1ifI9.res] ==> ignore
++    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
++    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
++    arg [-plugin-opt=-pass-through=-lc] ==> ignore
++    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
++    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
++    arg [--sysroot=/] ==> ignore
++    arg [--build-id] ==> ignore
++    arg [--eh-frame-hdr] ==> ignore
++    arg [-m] ==> ignore
++    arg [elf_x86_64] ==> ignore
++    arg [--hash-style=gnu] ==> ignore
++    arg [--as-needed] ==> ignore
++    arg [-export-dynamic] ==> ignore
++    arg [-dynamic-linker] ==> ignore
++    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
++    arg [-pie] ==> ignore
++    arg [-znow] ==> ignore
++    arg [-zrelro] ==> ignore
++    arg [-o] ==> ignore
++    arg [cmTC_17b8c] ==> ignore
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/Scrt1.o] ==> ignore
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/crti.o] ==> ignore
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/crtbeginS.o] ==> ignore
++    arg [-L/usr/lib/gcc/x86_64-linux-gnu/7] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/7]
++    arg [-L/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu]
++    arg [-L/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib]
++    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
++    arg [-L/lib/../lib] ==> dir [/lib/../lib]
++    arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
++    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
++    arg [-L/usr/lib/gcc/x86_64-linux-gnu/7/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/7/../../..]
++    arg [CMakeFiles/cmTC_17b8c.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
++    arg [-lstdc++] ==> lib [stdc++]
++    arg [-lm] ==> lib [m]
++    arg [-lgcc_s] ==> lib [gcc_s]
++    arg [-lgcc] ==> lib [gcc]
++    arg [-lc] ==> lib [c]
++    arg [-lgcc_s] ==> lib [gcc_s]
++    arg [-lgcc] ==> lib [gcc]
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/crtendS.o] ==> ignore
++    arg [/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/crtn.o] ==> ignore
++  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/7] ==> [/usr/lib/gcc/x86_64-linux-gnu/7]
++  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
++  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib] ==> [/usr/lib]
++  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
++  collapse library dir [/lib/../lib] ==> [/lib]
++  collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
++  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
++  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/7/../../..] ==> [/usr/lib]
++  implicit libs: [stdc++;m;gcc_s;gcc;c;gcc_s;gcc]
++  implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/7;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
++  implicit fwks: []
++
++
++
++
++Detecting CXX [-std=c++1z] compiler features compiled with the following output:
++Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp
++
++Run Build Command:"/usr/bin/make" "cmTC_a7734/fast"
++make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++/usr/bin/make -f CMakeFiles/cmTC_a7734.dir/build.make CMakeFiles/cmTC_a7734.dir/build
++make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++Building CXX object CMakeFiles/cmTC_a7734.dir/feature_tests.cxx.o
++/usr/bin/c++    -std=c++1z -o CMakeFiles/cmTC_a7734.dir/feature_tests.cxx.o -c /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/feature_tests.cxx
++Linking CXX executable cmTC_a7734
++/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a7734.dir/link.txt --verbose=1
++/usr/bin/c++       -rdynamic CMakeFiles/cmTC_a7734.dir/feature_tests.cxx.o  -o cmTC_a7734 
++make[2]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++make[1]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++
++
++    Feature record: CXX_FEATURE:1cxx_aggregate_default_initializers
++    Feature record: CXX_FEATURE:1cxx_alias_templates
++    Feature record: CXX_FEATURE:1cxx_alignas
++    Feature record: CXX_FEATURE:1cxx_alignof
++    Feature record: CXX_FEATURE:1cxx_attributes
++    Feature record: CXX_FEATURE:1cxx_attribute_deprecated
++    Feature record: CXX_FEATURE:1cxx_auto_type
++    Feature record: CXX_FEATURE:1cxx_binary_literals
++    Feature record: CXX_FEATURE:1cxx_constexpr
++    Feature record: CXX_FEATURE:1cxx_contextual_conversions
++    Feature record: CXX_FEATURE:1cxx_decltype
++    Feature record: CXX_FEATURE:1cxx_decltype_auto
++    Feature record: CXX_FEATURE:1cxx_decltype_incomplete_return_types
++    Feature record: CXX_FEATURE:1cxx_default_function_template_args
++    Feature record: CXX_FEATURE:1cxx_defaulted_functions
++    Feature record: CXX_FEATURE:1cxx_defaulted_move_initializers
++    Feature record: CXX_FEATURE:1cxx_delegating_constructors
++    Feature record: CXX_FEATURE:1cxx_deleted_functions
++    Feature record: CXX_FEATURE:1cxx_digit_separators
++    Feature record: CXX_FEATURE:1cxx_enum_forward_declarations
++    Feature record: CXX_FEATURE:1cxx_explicit_conversions
++    Feature record: CXX_FEATURE:1cxx_extended_friend_declarations
++    Feature record: CXX_FEATURE:1cxx_extern_templates
++    Feature record: CXX_FEATURE:1cxx_final
++    Feature record: CXX_FEATURE:1cxx_func_identifier
++    Feature record: CXX_FEATURE:1cxx_generalized_initializers
++    Feature record: CXX_FEATURE:1cxx_generic_lambdas
++    Feature record: CXX_FEATURE:1cxx_inheriting_constructors
++    Feature record: CXX_FEATURE:1cxx_inline_namespaces
++    Feature record: CXX_FEATURE:1cxx_lambdas
++    Feature record: CXX_FEATURE:1cxx_lambda_init_captures
++    Feature record: CXX_FEATURE:1cxx_local_type_template_args
++    Feature record: CXX_FEATURE:1cxx_long_long_type
++    Feature record: CXX_FEATURE:1cxx_noexcept
++    Feature record: CXX_FEATURE:1cxx_nonstatic_member_init
++    Feature record: CXX_FEATURE:1cxx_nullptr
++    Feature record: CXX_FEATURE:1cxx_override
++    Feature record: CXX_FEATURE:1cxx_range_for
++    Feature record: CXX_FEATURE:1cxx_raw_string_literals
++    Feature record: CXX_FEATURE:1cxx_reference_qualified_functions
++    Feature record: CXX_FEATURE:1cxx_relaxed_constexpr
++    Feature record: CXX_FEATURE:1cxx_return_type_deduction
++    Feature record: CXX_FEATURE:1cxx_right_angle_brackets
++    Feature record: CXX_FEATURE:1cxx_rvalue_references
++    Feature record: CXX_FEATURE:1cxx_sizeof_member
++    Feature record: CXX_FEATURE:1cxx_static_assert
++    Feature record: CXX_FEATURE:1cxx_strong_enums
++    Feature record: CXX_FEATURE:1cxx_template_template_parameters
++    Feature record: CXX_FEATURE:1cxx_thread_local
++    Feature record: CXX_FEATURE:1cxx_trailing_return_types
++    Feature record: CXX_FEATURE:1cxx_unicode_literals
++    Feature record: CXX_FEATURE:1cxx_uniform_initialization
++    Feature record: CXX_FEATURE:1cxx_unrestricted_unions
++    Feature record: CXX_FEATURE:1cxx_user_literals
++    Feature record: CXX_FEATURE:1cxx_variable_templates
++    Feature record: CXX_FEATURE:1cxx_variadic_macros
++    Feature record: CXX_FEATURE:1cxx_variadic_templates
++
++
++Detecting CXX [-std=c++14] compiler features compiled with the following output:
++Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp
++
++Run Build Command:"/usr/bin/make" "cmTC_e8091/fast"
++make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++/usr/bin/make -f CMakeFiles/cmTC_e8091.dir/build.make CMakeFiles/cmTC_e8091.dir/build
++make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++Building CXX object CMakeFiles/cmTC_e8091.dir/feature_tests.cxx.o
++/usr/bin/c++    -std=c++14 -o CMakeFiles/cmTC_e8091.dir/feature_tests.cxx.o -c /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/feature_tests.cxx
++Linking CXX executable cmTC_e8091
++/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e8091.dir/link.txt --verbose=1
++/usr/bin/c++       -rdynamic CMakeFiles/cmTC_e8091.dir/feature_tests.cxx.o  -o cmTC_e8091 
++make[2]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++make[1]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++
++
++    Feature record: CXX_FEATURE:1cxx_aggregate_default_initializers
++    Feature record: CXX_FEATURE:1cxx_alias_templates
++    Feature record: CXX_FEATURE:1cxx_alignas
++    Feature record: CXX_FEATURE:1cxx_alignof
++    Feature record: CXX_FEATURE:1cxx_attributes
++    Feature record: CXX_FEATURE:1cxx_attribute_deprecated
++    Feature record: CXX_FEATURE:1cxx_auto_type
++    Feature record: CXX_FEATURE:1cxx_binary_literals
++    Feature record: CXX_FEATURE:1cxx_constexpr
++    Feature record: CXX_FEATURE:1cxx_contextual_conversions
++    Feature record: CXX_FEATURE:1cxx_decltype
++    Feature record: CXX_FEATURE:1cxx_decltype_auto
++    Feature record: CXX_FEATURE:1cxx_decltype_incomplete_return_types
++    Feature record: CXX_FEATURE:1cxx_default_function_template_args
++    Feature record: CXX_FEATURE:1cxx_defaulted_functions
++    Feature record: CXX_FEATURE:1cxx_defaulted_move_initializers
++    Feature record: CXX_FEATURE:1cxx_delegating_constructors
++    Feature record: CXX_FEATURE:1cxx_deleted_functions
++    Feature record: CXX_FEATURE:1cxx_digit_separators
++    Feature record: CXX_FEATURE:1cxx_enum_forward_declarations
++    Feature record: CXX_FEATURE:1cxx_explicit_conversions
++    Feature record: CXX_FEATURE:1cxx_extended_friend_declarations
++    Feature record: CXX_FEATURE:1cxx_extern_templates
++    Feature record: CXX_FEATURE:1cxx_final
++    Feature record: CXX_FEATURE:1cxx_func_identifier
++    Feature record: CXX_FEATURE:1cxx_generalized_initializers
++    Feature record: CXX_FEATURE:1cxx_generic_lambdas
++    Feature record: CXX_FEATURE:1cxx_inheriting_constructors
++    Feature record: CXX_FEATURE:1cxx_inline_namespaces
++    Feature record: CXX_FEATURE:1cxx_lambdas
++    Feature record: CXX_FEATURE:1cxx_lambda_init_captures
++    Feature record: CXX_FEATURE:1cxx_local_type_template_args
++    Feature record: CXX_FEATURE:1cxx_long_long_type
++    Feature record: CXX_FEATURE:1cxx_noexcept
++    Feature record: CXX_FEATURE:1cxx_nonstatic_member_init
++    Feature record: CXX_FEATURE:1cxx_nullptr
++    Feature record: CXX_FEATURE:1cxx_override
++    Feature record: CXX_FEATURE:1cxx_range_for
++    Feature record: CXX_FEATURE:1cxx_raw_string_literals
++    Feature record: CXX_FEATURE:1cxx_reference_qualified_functions
++    Feature record: CXX_FEATURE:1cxx_relaxed_constexpr
++    Feature record: CXX_FEATURE:1cxx_return_type_deduction
++    Feature record: CXX_FEATURE:1cxx_right_angle_brackets
++    Feature record: CXX_FEATURE:1cxx_rvalue_references
++    Feature record: CXX_FEATURE:1cxx_sizeof_member
++    Feature record: CXX_FEATURE:1cxx_static_assert
++    Feature record: CXX_FEATURE:1cxx_strong_enums
++    Feature record: CXX_FEATURE:1cxx_template_template_parameters
++    Feature record: CXX_FEATURE:1cxx_thread_local
++    Feature record: CXX_FEATURE:1cxx_trailing_return_types
++    Feature record: CXX_FEATURE:1cxx_unicode_literals
++    Feature record: CXX_FEATURE:1cxx_uniform_initialization
++    Feature record: CXX_FEATURE:1cxx_unrestricted_unions
++    Feature record: CXX_FEATURE:1cxx_user_literals
++    Feature record: CXX_FEATURE:1cxx_variable_templates
++    Feature record: CXX_FEATURE:1cxx_variadic_macros
++    Feature record: CXX_FEATURE:1cxx_variadic_templates
++
++
++Detecting CXX [-std=c++11] compiler features compiled with the following output:
++Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp
++
++Run Build Command:"/usr/bin/make" "cmTC_38851/fast"
++make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++/usr/bin/make -f CMakeFiles/cmTC_38851.dir/build.make CMakeFiles/cmTC_38851.dir/build
++make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++Building CXX object CMakeFiles/cmTC_38851.dir/feature_tests.cxx.o
++/usr/bin/c++    -std=c++11 -o CMakeFiles/cmTC_38851.dir/feature_tests.cxx.o -c /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/feature_tests.cxx
++Linking CXX executable cmTC_38851
++/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_38851.dir/link.txt --verbose=1
++/usr/bin/c++       -rdynamic CMakeFiles/cmTC_38851.dir/feature_tests.cxx.o  -o cmTC_38851 
++make[2]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++make[1]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++
++
++    Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
++    Feature record: CXX_FEATURE:1cxx_alias_templates
++    Feature record: CXX_FEATURE:1cxx_alignas
++    Feature record: CXX_FEATURE:1cxx_alignof
++    Feature record: CXX_FEATURE:1cxx_attributes
++    Feature record: CXX_FEATURE:0cxx_attribute_deprecated
++    Feature record: CXX_FEATURE:1cxx_auto_type
++    Feature record: CXX_FEATURE:0cxx_binary_literals
++    Feature record: CXX_FEATURE:1cxx_constexpr
++    Feature record: CXX_FEATURE:0cxx_contextual_conversions
++    Feature record: CXX_FEATURE:1cxx_decltype
++    Feature record: CXX_FEATURE:0cxx_decltype_auto
++    Feature record: CXX_FEATURE:1cxx_decltype_incomplete_return_types
++    Feature record: CXX_FEATURE:1cxx_default_function_template_args
++    Feature record: CXX_FEATURE:1cxx_defaulted_functions
++    Feature record: CXX_FEATURE:1cxx_defaulted_move_initializers
++    Feature record: CXX_FEATURE:1cxx_delegating_constructors
++    Feature record: CXX_FEATURE:1cxx_deleted_functions
++    Feature record: CXX_FEATURE:0cxx_digit_separators
++    Feature record: CXX_FEATURE:1cxx_enum_forward_declarations
++    Feature record: CXX_FEATURE:1cxx_explicit_conversions
++    Feature record: CXX_FEATURE:1cxx_extended_friend_declarations
++    Feature record: CXX_FEATURE:1cxx_extern_templates
++    Feature record: CXX_FEATURE:1cxx_final
++    Feature record: CXX_FEATURE:1cxx_func_identifier
++    Feature record: CXX_FEATURE:1cxx_generalized_initializers
++    Feature record: CXX_FEATURE:0cxx_generic_lambdas
++    Feature record: CXX_FEATURE:1cxx_inheriting_constructors
++    Feature record: CXX_FEATURE:1cxx_inline_namespaces
++    Feature record: CXX_FEATURE:1cxx_lambdas
++    Feature record: CXX_FEATURE:0cxx_lambda_init_captures
++    Feature record: CXX_FEATURE:1cxx_local_type_template_args
++    Feature record: CXX_FEATURE:1cxx_long_long_type
++    Feature record: CXX_FEATURE:1cxx_noexcept
++    Feature record: CXX_FEATURE:1cxx_nonstatic_member_init
++    Feature record: CXX_FEATURE:1cxx_nullptr
++    Feature record: CXX_FEATURE:1cxx_override
++    Feature record: CXX_FEATURE:1cxx_range_for
++    Feature record: CXX_FEATURE:1cxx_raw_string_literals
++    Feature record: CXX_FEATURE:1cxx_reference_qualified_functions
++    Feature record: CXX_FEATURE:0cxx_relaxed_constexpr
++    Feature record: CXX_FEATURE:0cxx_return_type_deduction
++    Feature record: CXX_FEATURE:1cxx_right_angle_brackets
++    Feature record: CXX_FEATURE:1cxx_rvalue_references
++    Feature record: CXX_FEATURE:1cxx_sizeof_member
++    Feature record: CXX_FEATURE:1cxx_static_assert
++    Feature record: CXX_FEATURE:1cxx_strong_enums
++    Feature record: CXX_FEATURE:1cxx_template_template_parameters
++    Feature record: CXX_FEATURE:1cxx_thread_local
++    Feature record: CXX_FEATURE:1cxx_trailing_return_types
++    Feature record: CXX_FEATURE:1cxx_unicode_literals
++    Feature record: CXX_FEATURE:1cxx_uniform_initialization
++    Feature record: CXX_FEATURE:1cxx_unrestricted_unions
++    Feature record: CXX_FEATURE:1cxx_user_literals
++    Feature record: CXX_FEATURE:0cxx_variable_templates
++    Feature record: CXX_FEATURE:1cxx_variadic_macros
++    Feature record: CXX_FEATURE:1cxx_variadic_templates
++
++
++Detecting CXX [-std=c++98] compiler features compiled with the following output:
++Change Dir: /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp
++
++Run Build Command:"/usr/bin/make" "cmTC_1d30a/fast"
++make[1]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++/usr/bin/make -f CMakeFiles/cmTC_1d30a.dir/build.make CMakeFiles/cmTC_1d30a.dir/build
++make[2]: Entering directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++Building CXX object CMakeFiles/cmTC_1d30a.dir/feature_tests.cxx.o
++/usr/bin/c++    -std=c++98 -o CMakeFiles/cmTC_1d30a.dir/feature_tests.cxx.o -c /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/feature_tests.cxx
++Linking CXX executable cmTC_1d30a
++/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1d30a.dir/link.txt --verbose=1
++/usr/bin/c++       -rdynamic CMakeFiles/cmTC_1d30a.dir/feature_tests.cxx.o  -o cmTC_1d30a 
++make[2]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++make[1]: Leaving directory '/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles/CMakeTmp'
++
++
++    Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
++    Feature record: CXX_FEATURE:0cxx_alias_templates
++    Feature record: CXX_FEATURE:0cxx_alignas
++    Feature record: CXX_FEATURE:0cxx_alignof
++    Feature record: CXX_FEATURE:0cxx_attributes
++    Feature record: CXX_FEATURE:0cxx_attribute_deprecated
++    Feature record: CXX_FEATURE:0cxx_auto_type
++    Feature record: CXX_FEATURE:0cxx_binary_literals
++    Feature record: CXX_FEATURE:0cxx_constexpr
++    Feature record: CXX_FEATURE:0cxx_contextual_conversions
++    Feature record: CXX_FEATURE:0cxx_decltype
++    Feature record: CXX_FEATURE:0cxx_decltype_auto
++    Feature record: CXX_FEATURE:0cxx_decltype_incomplete_return_types
++    Feature record: CXX_FEATURE:0cxx_default_function_template_args
++    Feature record: CXX_FEATURE:0cxx_defaulted_functions
++    Feature record: CXX_FEATURE:0cxx_defaulted_move_initializers
++    Feature record: CXX_FEATURE:0cxx_delegating_constructors
++    Feature record: CXX_FEATURE:0cxx_deleted_functions
++    Feature record: CXX_FEATURE:0cxx_digit_separators
++    Feature record: CXX_FEATURE:0cxx_enum_forward_declarations
++    Feature record: CXX_FEATURE:0cxx_explicit_conversions
++    Feature record: CXX_FEATURE:0cxx_extended_friend_declarations
++    Feature record: CXX_FEATURE:0cxx_extern_templates
++    Feature record: CXX_FEATURE:0cxx_final
++    Feature record: CXX_FEATURE:0cxx_func_identifier
++    Feature record: CXX_FEATURE:0cxx_generalized_initializers
++    Feature record: CXX_FEATURE:0cxx_generic_lambdas
++    Feature record: CXX_FEATURE:0cxx_inheriting_constructors
++    Feature record: CXX_FEATURE:0cxx_inline_namespaces
++    Feature record: CXX_FEATURE:0cxx_lambdas
++    Feature record: CXX_FEATURE:0cxx_lambda_init_captures
++    Feature record: CXX_FEATURE:0cxx_local_type_template_args
++    Feature record: CXX_FEATURE:0cxx_long_long_type
++    Feature record: CXX_FEATURE:0cxx_noexcept
++    Feature record: CXX_FEATURE:0cxx_nonstatic_member_init
++    Feature record: CXX_FEATURE:0cxx_nullptr
++    Feature record: CXX_FEATURE:0cxx_override
++    Feature record: CXX_FEATURE:0cxx_range_for
++    Feature record: CXX_FEATURE:0cxx_raw_string_literals
++    Feature record: CXX_FEATURE:0cxx_reference_qualified_functions
++    Feature record: CXX_FEATURE:0cxx_relaxed_constexpr
++    Feature record: CXX_FEATURE:0cxx_return_type_deduction
++    Feature record: CXX_FEATURE:0cxx_right_angle_brackets
++    Feature record: CXX_FEATURE:0cxx_rvalue_references
++    Feature record: CXX_FEATURE:0cxx_sizeof_member
++    Feature record: CXX_FEATURE:0cxx_static_assert
++    Feature record: CXX_FEATURE:0cxx_strong_enums
++    Feature record: CXX_FEATURE:1cxx_template_template_parameters
++    Feature record: CXX_FEATURE:0cxx_thread_local
++    Feature record: CXX_FEATURE:0cxx_trailing_return_types
++    Feature record: CXX_FEATURE:0cxx_unicode_literals
++    Feature record: CXX_FEATURE:0cxx_uniform_initialization
++    Feature record: CXX_FEATURE:0cxx_unrestricted_unions
++    Feature record: CXX_FEATURE:0cxx_user_literals
++    Feature record: CXX_FEATURE:0cxx_variable_templates
++    Feature record: CXX_FEATURE:0cxx_variadic_macros
++    Feature record: CXX_FEATURE:0cxx_variadic_templates
+diff -Nru -X exclude-ext ike.orig/CMakeFiles/feature_tests.c ike/CMakeFiles/feature_tests.c
+--- ike.orig/CMakeFiles/feature_tests.c	1970-01-01 01:00:00.000000000 +0100
++++ ike/CMakeFiles/feature_tests.c	2019-01-14 13:25:30.232298176 +0100
+@@ -0,0 +1,34 @@
++
++  const char features[] = {"\n"
++"C_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 304
++"1"
++#else
++"0"
++#endif
++"c_function_prototypes\n"
++"C_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 304 && defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
++"1"
++#else
++"0"
++#endif
++"c_restrict\n"
++"C_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201000L
++"1"
++#else
++"0"
++#endif
++"c_static_assert\n"
++"C_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 304 && defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
++"1"
++#else
++"0"
++#endif
++"c_variadic_macros\n"
++
++};
++
++int main(int argc, char** argv) { (void)argv; return features[argc]; }
+diff -Nru -X exclude-ext ike.orig/CMakeFiles/feature_tests.cxx ike/CMakeFiles/feature_tests.cxx
+--- ike.orig/CMakeFiles/feature_tests.cxx	1970-01-01 01:00:00.000000000 +0100
++++ ike/CMakeFiles/feature_tests.cxx	2019-01-14 13:25:31.176306664 +0100
+@@ -0,0 +1,405 @@
++
++  const char features[] = {"\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 500 && __cplusplus >= 201402L
++"1"
++#else
++"0"
++#endif
++"cxx_aggregate_default_initializers\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_alias_templates\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_alignas\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_alignof\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_attributes\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 409 && __cplusplus > 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_attribute_deprecated\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_auto_type\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 409 && __cplusplus > 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_binary_literals\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_constexpr\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 409 && __cplusplus > 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_contextual_conversions\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_decltype\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 409 && __cplusplus > 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_decltype_auto\n"
++"CXX_FEATURE:"
++#if ((__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 40801) && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_decltype_incomplete_return_types\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_default_function_template_args\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_defaulted_functions\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_defaulted_move_initializers\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_delegating_constructors\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_deleted_functions\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 409 && __cplusplus > 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_digit_separators\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_enum_forward_declarations\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 405 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_explicit_conversions\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_extended_friend_declarations\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_extern_templates\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_final\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_func_identifier\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_generalized_initializers\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 409 && __cplusplus > 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_generic_lambdas\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_inheriting_constructors\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_inline_namespaces\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 405 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_lambdas\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 409 && __cplusplus > 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_lambda_init_captures\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 405 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_local_type_template_args\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_long_long_type\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_noexcept\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_nonstatic_member_init\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_nullptr\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_override\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_range_for\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 405 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_raw_string_literals\n"
++"CXX_FEATURE:"
++#if ((__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 40801) && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_reference_qualified_functions\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 500 && __cplusplus >= 201402L
++"1"
++#else
++"0"
++#endif
++"cxx_relaxed_constexpr\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 409 && __cplusplus > 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_return_type_deduction\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_right_angle_brackets\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_rvalue_references\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_sizeof_member\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_static_assert\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_strong_enums\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && __cplusplus
++"1"
++#else
++"0"
++#endif
++"cxx_template_template_parameters\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_thread_local\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_trailing_return_types\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_unicode_literals\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_uniform_initialization\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_unrestricted_unions\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 407 && __cplusplus >= 201103L
++"1"
++#else
++"0"
++#endif
++"cxx_user_literals\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 500 && __cplusplus >= 201402L
++"1"
++#else
++"0"
++#endif
++"cxx_variable_templates\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_variadic_macros\n"
++"CXX_FEATURE:"
++#if (__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && (__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))
++"1"
++#else
++"0"
++#endif
++"cxx_variadic_templates\n"
++
++};
++
++int main(int argc, char** argv) { (void)argv; return features[argc]; }
+diff -Nru -X exclude-ext ike.orig/CMakeFiles/Makefile2 ike/CMakeFiles/Makefile2
+--- ike.orig/CMakeFiles/Makefile2	1970-01-01 01:00:00.000000000 +0100
++++ ike/CMakeFiles/Makefile2	2019-01-15 13:39:29.837738309 +0100
+@@ -0,0 +1,559 @@
++# CMAKE generated file: DO NOT EDIT!
++# Generated by "Unix Makefiles" Generator, CMake Version 3.10
++
++# Default target executed when no arguments are given to make.
++default_target: all
++
++.PHONY : default_target
++
++# The main recursive all target
++all:
++
++.PHONY : all
++
++# The main recursive preinstall target
++preinstall:
++
++.PHONY : preinstall
++
++#=============================================================================
++# Special targets provided by cmake.
++
++# Disable implicit rules so canonical targets will work.
++.SUFFIXES:
++
++
++# Remove some rules from gmake that .SUFFIXES does not remove.
++SUFFIXES =
++
++.SUFFIXES: .hpux_make_needs_suffix_list
++
++
++# Suppress display of executed commands.
++$(VERBOSE).SILENT:
++
++
++# A target that is always out of date.
++cmake_force:
++
++.PHONY : cmake_force
++
++#=============================================================================
++# Set environment variables for the build.
++
++# The shell in which to execute make rules.
++SHELL = /bin/sh
++
++# The CMake executable.
++CMAKE_COMMAND = /usr/bin/cmake
++
++# The command to remove a file.
++RM = /usr/bin/cmake -E remove -f
++
++# Escaping for special characters.
++EQUALS = =
++
++# The top-level source directory on which CMake was run.
++CMAKE_SOURCE_DIR = /home/henri/Downloads/ike-mint19.1/ike
++
++# The top-level build directory on which CMake was run.
++CMAKE_BINARY_DIR = /home/henri/Downloads/ike-mint19.1/ike
++
++#=============================================================================
++# Directory level rules for directory source/iked
++
++# Convenience name for "all" pass in the directory.
++source/iked/all: source/iked/CMakeFiles/iked.dir/all
++
++.PHONY : source/iked/all
++
++# Convenience name for "clean" pass in the directory.
++source/iked/clean: source/iked/CMakeFiles/ConfParser.dir/clean
++source/iked/clean: source/iked/CMakeFiles/iked.dir/clean
++
++.PHONY : source/iked/clean
++
++# Convenience name for "preinstall" pass in the directory.
++source/iked/preinstall:
++
++.PHONY : source/iked/preinstall
++
++#=============================================================================
++# Target rules for target source/iked/CMakeFiles/ConfParser.dir
++
++# All Build rule for target.
++source/iked/CMakeFiles/ConfParser.dir/all:
++	$(MAKE) -f source/iked/CMakeFiles/ConfParser.dir/build.make source/iked/CMakeFiles/ConfParser.dir/depend
++	$(MAKE) -f source/iked/CMakeFiles/ConfParser.dir/build.make source/iked/CMakeFiles/ConfParser.dir/build
++	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles --progress-num= "Built target ConfParser"
++.PHONY : source/iked/CMakeFiles/ConfParser.dir/all
++
++# Build rule for subdir invocation for target.
++source/iked/CMakeFiles/ConfParser.dir/rule: cmake_check_build_system
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 0
++	$(MAKE) -f CMakeFiles/Makefile2 source/iked/CMakeFiles/ConfParser.dir/all
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 0
++.PHONY : source/iked/CMakeFiles/ConfParser.dir/rule
++
++# Convenience name for target.
++ConfParser: source/iked/CMakeFiles/ConfParser.dir/rule
++
++.PHONY : ConfParser
++
++# clean rule for target.
++source/iked/CMakeFiles/ConfParser.dir/clean:
++	$(MAKE) -f source/iked/CMakeFiles/ConfParser.dir/build.make source/iked/CMakeFiles/ConfParser.dir/clean
++.PHONY : source/iked/CMakeFiles/ConfParser.dir/clean
++
++# clean rule for target.
++clean: source/iked/CMakeFiles/ConfParser.dir/clean
++
++.PHONY : clean
++
++#=============================================================================
++# Target rules for target source/iked/CMakeFiles/iked.dir
++
++# All Build rule for target.
++source/iked/CMakeFiles/iked.dir/all: source/libike/CMakeFiles/ss_ike.dir/all
++source/iked/CMakeFiles/iked.dir/all: source/libip/CMakeFiles/ss_ip.dir/all
++source/iked/CMakeFiles/iked.dir/all: source/libidb/CMakeFiles/ss_idb.dir/all
++source/iked/CMakeFiles/iked.dir/all: source/libith/CMakeFiles/ss_ith.dir/all
++source/iked/CMakeFiles/iked.dir/all: source/liblog/CMakeFiles/ss_log.dir/all
++source/iked/CMakeFiles/iked.dir/all: source/libpfk/CMakeFiles/ss_pfk.dir/all
++	$(MAKE) -f source/iked/CMakeFiles/iked.dir/build.make source/iked/CMakeFiles/iked.dir/depend
++	$(MAKE) -f source/iked/CMakeFiles/iked.dir/build.make source/iked/CMakeFiles/iked.dir/build
++	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles --progress-num=4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40 "Built target iked"
++.PHONY : source/iked/CMakeFiles/iked.dir/all
++
++# Include target in all.
++all: source/iked/CMakeFiles/iked.dir/all
++
++.PHONY : all
++
++# Build rule for subdir invocation for target.
++source/iked/CMakeFiles/iked.dir/rule: cmake_check_build_system
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 61
++	$(MAKE) -f CMakeFiles/Makefile2 source/iked/CMakeFiles/iked.dir/all
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 0
++.PHONY : source/iked/CMakeFiles/iked.dir/rule
++
++# Convenience name for target.
++iked: source/iked/CMakeFiles/iked.dir/rule
++
++.PHONY : iked
++
++# clean rule for target.
++source/iked/CMakeFiles/iked.dir/clean:
++	$(MAKE) -f source/iked/CMakeFiles/iked.dir/build.make source/iked/CMakeFiles/iked.dir/clean
++.PHONY : source/iked/CMakeFiles/iked.dir/clean
++
++# clean rule for target.
++clean: source/iked/CMakeFiles/iked.dir/clean
++
++.PHONY : clean
++
++#=============================================================================
++# Directory level rules for directory source/ikec
++
++# Convenience name for "all" pass in the directory.
++source/ikec/all: source/ikec/CMakeFiles/ikec.dir/all
++
++.PHONY : source/ikec/all
++
++# Convenience name for "clean" pass in the directory.
++source/ikec/clean: source/ikec/CMakeFiles/ikec.dir/clean
++
++.PHONY : source/ikec/clean
++
++# Convenience name for "preinstall" pass in the directory.
++source/ikec/preinstall:
++
++.PHONY : source/ikec/preinstall
++
++#=============================================================================
++# Target rules for target source/ikec/CMakeFiles/ikec.dir
++
++# All Build rule for target.
++source/ikec/CMakeFiles/ikec.dir/all: source/libike/CMakeFiles/ss_ike.dir/all
++source/ikec/CMakeFiles/ikec.dir/all: source/libidb/CMakeFiles/ss_idb.dir/all
++source/ikec/CMakeFiles/ikec.dir/all: source/libith/CMakeFiles/ss_ith.dir/all
++source/ikec/CMakeFiles/ikec.dir/all: source/liblog/CMakeFiles/ss_log.dir/all
++	$(MAKE) -f source/ikec/CMakeFiles/ikec.dir/build.make source/ikec/CMakeFiles/ikec.dir/depend
++	$(MAKE) -f source/ikec/CMakeFiles/ikec.dir/build.make source/ikec/CMakeFiles/ikec.dir/build
++	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles --progress-num=1,2,3 "Built target ikec"
++.PHONY : source/ikec/CMakeFiles/ikec.dir/all
++
++# Include target in all.
++all: source/ikec/CMakeFiles/ikec.dir/all
++
++.PHONY : all
++
++# Build rule for subdir invocation for target.
++source/ikec/CMakeFiles/ikec.dir/rule: cmake_check_build_system
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 16
++	$(MAKE) -f CMakeFiles/Makefile2 source/ikec/CMakeFiles/ikec.dir/all
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 0
++.PHONY : source/ikec/CMakeFiles/ikec.dir/rule
++
++# Convenience name for target.
++ikec: source/ikec/CMakeFiles/ikec.dir/rule
++
++.PHONY : ikec
++
++# clean rule for target.
++source/ikec/CMakeFiles/ikec.dir/clean:
++	$(MAKE) -f source/ikec/CMakeFiles/ikec.dir/build.make source/ikec/CMakeFiles/ikec.dir/clean
++.PHONY : source/ikec/CMakeFiles/ikec.dir/clean
++
++# clean rule for target.
++clean: source/ikec/CMakeFiles/ikec.dir/clean
++
++.PHONY : clean
++
++#=============================================================================
++# Directory level rules for directory source/libike
++
++# Convenience name for "all" pass in the directory.
++source/libike/all: source/libike/CMakeFiles/ss_ike.dir/all
++
++.PHONY : source/libike/all
++
++# Convenience name for "clean" pass in the directory.
++source/libike/clean: source/libike/CMakeFiles/ss_ike.dir/clean
++
++.PHONY : source/libike/clean
++
++# Convenience name for "preinstall" pass in the directory.
++source/libike/preinstall:
++
++.PHONY : source/libike/preinstall
++
++#=============================================================================
++# Target rules for target source/libike/CMakeFiles/ss_ike.dir
++
++# All Build rule for target.
++source/libike/CMakeFiles/ss_ike.dir/all: source/libidb/CMakeFiles/ss_idb.dir/all
++source/libike/CMakeFiles/ss_ike.dir/all: source/libith/CMakeFiles/ss_ith.dir/all
++source/libike/CMakeFiles/ss_ike.dir/all: source/liblog/CMakeFiles/ss_log.dir/all
++	$(MAKE) -f source/libike/CMakeFiles/ss_ike.dir/build.make source/libike/CMakeFiles/ss_ike.dir/depend
++	$(MAKE) -f source/libike/CMakeFiles/ss_ike.dir/build.make source/libike/CMakeFiles/ss_ike.dir/build
++	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles --progress-num=44,45,46,47,48,49 "Built target ss_ike"
++.PHONY : source/libike/CMakeFiles/ss_ike.dir/all
++
++# Include target in all.
++all: source/libike/CMakeFiles/ss_ike.dir/all
++
++.PHONY : all
++
++# Build rule for subdir invocation for target.
++source/libike/CMakeFiles/ss_ike.dir/rule: cmake_check_build_system
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 13
++	$(MAKE) -f CMakeFiles/Makefile2 source/libike/CMakeFiles/ss_ike.dir/all
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 0
++.PHONY : source/libike/CMakeFiles/ss_ike.dir/rule
++
++# Convenience name for target.
++ss_ike: source/libike/CMakeFiles/ss_ike.dir/rule
++
++.PHONY : ss_ike
++
++# clean rule for target.
++source/libike/CMakeFiles/ss_ike.dir/clean:
++	$(MAKE) -f source/libike/CMakeFiles/ss_ike.dir/build.make source/libike/CMakeFiles/ss_ike.dir/clean
++.PHONY : source/libike/CMakeFiles/ss_ike.dir/clean
++
++# clean rule for target.
++clean: source/libike/CMakeFiles/ss_ike.dir/clean
++
++.PHONY : clean
++
++#=============================================================================
++# Directory level rules for directory source/libip
++
++# Convenience name for "all" pass in the directory.
++source/libip/all: source/libip/CMakeFiles/ss_ip.dir/all
++
++.PHONY : source/libip/all
++
++# Convenience name for "clean" pass in the directory.
++source/libip/clean: source/libip/CMakeFiles/ss_ip.dir/clean
++
++.PHONY : source/libip/clean
++
++# Convenience name for "preinstall" pass in the directory.
++source/libip/preinstall:
++
++.PHONY : source/libip/preinstall
++
++#=============================================================================
++# Target rules for target source/libip/CMakeFiles/ss_ip.dir
++
++# All Build rule for target.
++source/libip/CMakeFiles/ss_ip.dir/all: source/libidb/CMakeFiles/ss_idb.dir/all
++source/libip/CMakeFiles/ss_ip.dir/all: source/libith/CMakeFiles/ss_ith.dir/all
++source/libip/CMakeFiles/ss_ip.dir/all: source/liblog/CMakeFiles/ss_log.dir/all
++	$(MAKE) -f source/libip/CMakeFiles/ss_ip.dir/build.make source/libip/CMakeFiles/ss_ip.dir/depend
++	$(MAKE) -f source/libip/CMakeFiles/ss_ip.dir/build.make source/libip/CMakeFiles/ss_ip.dir/build
++	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles --progress-num=50,51,52,53,54,55,56,57,58 "Built target ss_ip"
++.PHONY : source/libip/CMakeFiles/ss_ip.dir/all
++
++# Include target in all.
++all: source/libip/CMakeFiles/ss_ip.dir/all
++
++.PHONY : all
++
++# Build rule for subdir invocation for target.
++source/libip/CMakeFiles/ss_ip.dir/rule: cmake_check_build_system
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 16
++	$(MAKE) -f CMakeFiles/Makefile2 source/libip/CMakeFiles/ss_ip.dir/all
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 0
++.PHONY : source/libip/CMakeFiles/ss_ip.dir/rule
++
++# Convenience name for target.
++ss_ip: source/libip/CMakeFiles/ss_ip.dir/rule
++
++.PHONY : ss_ip
++
++# clean rule for target.
++source/libip/CMakeFiles/ss_ip.dir/clean:
++	$(MAKE) -f source/libip/CMakeFiles/ss_ip.dir/build.make source/libip/CMakeFiles/ss_ip.dir/clean
++.PHONY : source/libip/CMakeFiles/ss_ip.dir/clean
++
++# clean rule for target.
++clean: source/libip/CMakeFiles/ss_ip.dir/clean
++
++.PHONY : clean
++
++#=============================================================================
++# Directory level rules for directory source/libidb
++
++# Convenience name for "all" pass in the directory.
++source/libidb/all: source/libidb/CMakeFiles/ss_idb.dir/all
++
++.PHONY : source/libidb/all
++
++# Convenience name for "clean" pass in the directory.
++source/libidb/clean: source/libidb/CMakeFiles/ss_idb.dir/clean
++
++.PHONY : source/libidb/clean
++
++# Convenience name for "preinstall" pass in the directory.
++source/libidb/preinstall:
++
++.PHONY : source/libidb/preinstall
++
++#=============================================================================
++# Target rules for target source/libidb/CMakeFiles/ss_idb.dir
++
++# All Build rule for target.
++source/libidb/CMakeFiles/ss_idb.dir/all: source/libith/CMakeFiles/ss_ith.dir/all
++source/libidb/CMakeFiles/ss_idb.dir/all: source/liblog/CMakeFiles/ss_log.dir/all
++	$(MAKE) -f source/libidb/CMakeFiles/ss_idb.dir/build.make source/libidb/CMakeFiles/ss_idb.dir/depend
++	$(MAKE) -f source/libidb/CMakeFiles/ss_idb.dir/build.make source/libidb/CMakeFiles/ss_idb.dir/build
++	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles --progress-num=41,42,43 "Built target ss_idb"
++.PHONY : source/libidb/CMakeFiles/ss_idb.dir/all
++
++# Include target in all.
++all: source/libidb/CMakeFiles/ss_idb.dir/all
++
++.PHONY : all
++
++# Build rule for subdir invocation for target.
++source/libidb/CMakeFiles/ss_idb.dir/rule: cmake_check_build_system
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 7
++	$(MAKE) -f CMakeFiles/Makefile2 source/libidb/CMakeFiles/ss_idb.dir/all
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 0
++.PHONY : source/libidb/CMakeFiles/ss_idb.dir/rule
++
++# Convenience name for target.
++ss_idb: source/libidb/CMakeFiles/ss_idb.dir/rule
++
++.PHONY : ss_idb
++
++# clean rule for target.
++source/libidb/CMakeFiles/ss_idb.dir/clean:
++	$(MAKE) -f source/libidb/CMakeFiles/ss_idb.dir/build.make source/libidb/CMakeFiles/ss_idb.dir/clean
++.PHONY : source/libidb/CMakeFiles/ss_idb.dir/clean
++
++# clean rule for target.
++clean: source/libidb/CMakeFiles/ss_idb.dir/clean
++
++.PHONY : clean
++
++#=============================================================================
++# Directory level rules for directory source/libith
++
++# Convenience name for "all" pass in the directory.
++source/libith/all: source/libith/CMakeFiles/ss_ith.dir/all
++
++.PHONY : source/libith/all
++
++# Convenience name for "clean" pass in the directory.
++source/libith/clean: source/libith/CMakeFiles/ss_ith.dir/clean
++
++.PHONY : source/libith/clean
++
++# Convenience name for "preinstall" pass in the directory.
++source/libith/preinstall:
++
++.PHONY : source/libith/preinstall
++
++#=============================================================================
++# Target rules for target source/libith/CMakeFiles/ss_ith.dir
++
++# All Build rule for target.
++source/libith/CMakeFiles/ss_ith.dir/all:
++	$(MAKE) -f source/libith/CMakeFiles/ss_ith.dir/build.make source/libith/CMakeFiles/ss_ith.dir/depend
++	$(MAKE) -f source/libith/CMakeFiles/ss_ith.dir/build.make source/libith/CMakeFiles/ss_ith.dir/build
++	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles --progress-num=59,60 "Built target ss_ith"
++.PHONY : source/libith/CMakeFiles/ss_ith.dir/all
++
++# Include target in all.
++all: source/libith/CMakeFiles/ss_ith.dir/all
++
++.PHONY : all
++
++# Build rule for subdir invocation for target.
++source/libith/CMakeFiles/ss_ith.dir/rule: cmake_check_build_system
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 2
++	$(MAKE) -f CMakeFiles/Makefile2 source/libith/CMakeFiles/ss_ith.dir/all
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 0
++.PHONY : source/libith/CMakeFiles/ss_ith.dir/rule
++
++# Convenience name for target.
++ss_ith: source/libith/CMakeFiles/ss_ith.dir/rule
++
++.PHONY : ss_ith
++
++# clean rule for target.
++source/libith/CMakeFiles/ss_ith.dir/clean:
++	$(MAKE) -f source/libith/CMakeFiles/ss_ith.dir/build.make source/libith/CMakeFiles/ss_ith.dir/clean
++.PHONY : source/libith/CMakeFiles/ss_ith.dir/clean
++
++# clean rule for target.
++clean: source/libith/CMakeFiles/ss_ith.dir/clean
++
++.PHONY : clean
++
++#=============================================================================
++# Directory level rules for directory source/liblog
++
++# Convenience name for "all" pass in the directory.
++source/liblog/all: source/liblog/CMakeFiles/ss_log.dir/all
++
++.PHONY : source/liblog/all
++
++# Convenience name for "clean" pass in the directory.
++source/liblog/clean: source/liblog/CMakeFiles/ss_log.dir/clean
++
++.PHONY : source/liblog/clean
++
++# Convenience name for "preinstall" pass in the directory.
++source/liblog/preinstall:
++
++.PHONY : source/liblog/preinstall
++
++#=============================================================================
++# Target rules for target source/liblog/CMakeFiles/ss_log.dir
++
++# All Build rule for target.
++source/liblog/CMakeFiles/ss_log.dir/all: source/libith/CMakeFiles/ss_ith.dir/all
++	$(MAKE) -f source/liblog/CMakeFiles/ss_log.dir/build.make source/liblog/CMakeFiles/ss_log.dir/depend
++	$(MAKE) -f source/liblog/CMakeFiles/ss_log.dir/build.make source/liblog/CMakeFiles/ss_log.dir/build
++	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles --progress-num=61,62 "Built target ss_log"
++.PHONY : source/liblog/CMakeFiles/ss_log.dir/all
++
++# Include target in all.
++all: source/liblog/CMakeFiles/ss_log.dir/all
++
++.PHONY : all
++
++# Build rule for subdir invocation for target.
++source/liblog/CMakeFiles/ss_log.dir/rule: cmake_check_build_system
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 4
++	$(MAKE) -f CMakeFiles/Makefile2 source/liblog/CMakeFiles/ss_log.dir/all
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 0
++.PHONY : source/liblog/CMakeFiles/ss_log.dir/rule
++
++# Convenience name for target.
++ss_log: source/liblog/CMakeFiles/ss_log.dir/rule
++
++.PHONY : ss_log
++
++# clean rule for target.
++source/liblog/CMakeFiles/ss_log.dir/clean:
++	$(MAKE) -f source/liblog/CMakeFiles/ss_log.dir/build.make source/liblog/CMakeFiles/ss_log.dir/clean
++.PHONY : source/liblog/CMakeFiles/ss_log.dir/clean
++
++# clean rule for target.
++clean: source/liblog/CMakeFiles/ss_log.dir/clean
++
++.PHONY : clean
++
++#=============================================================================
++# Directory level rules for directory source/libpfk
++
++# Convenience name for "all" pass in the directory.
++source/libpfk/all: source/libpfk/CMakeFiles/ss_pfk.dir/all
++
++.PHONY : source/libpfk/all
++
++# Convenience name for "clean" pass in the directory.
++source/libpfk/clean: source/libpfk/CMakeFiles/ss_pfk.dir/clean
++
++.PHONY : source/libpfk/clean
++
++# Convenience name for "preinstall" pass in the directory.
++source/libpfk/preinstall:
++
++.PHONY : source/libpfk/preinstall
++
++#=============================================================================
++# Target rules for target source/libpfk/CMakeFiles/ss_pfk.dir
++
++# All Build rule for target.
++source/libpfk/CMakeFiles/ss_pfk.dir/all: source/libidb/CMakeFiles/ss_idb.dir/all
++source/libpfk/CMakeFiles/ss_pfk.dir/all: source/libith/CMakeFiles/ss_ith.dir/all
++source/libpfk/CMakeFiles/ss_pfk.dir/all: source/liblog/CMakeFiles/ss_log.dir/all
++	$(MAKE) -f source/libpfk/CMakeFiles/ss_pfk.dir/build.make source/libpfk/CMakeFiles/ss_pfk.dir/depend
++	$(MAKE) -f source/libpfk/CMakeFiles/ss_pfk.dir/build.make source/libpfk/CMakeFiles/ss_pfk.dir/build
++	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/henri/Downloads/ike-mint19.1/ike/CMakeFiles --progress-num=63,64 "Built target ss_pfk"
++.PHONY : source/libpfk/CMakeFiles/ss_pfk.dir/all
++
++# Include target in all.
++all: source/libpfk/CMakeFiles/ss_pfk.dir/all
++
++.PHONY : all
++
++# Build rule for subdir invocation for target.
++source/libpfk/CMakeFiles/ss_pfk.dir/rule: cmake_check_build_system
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 9
++	$(MAKE) -f CMakeFiles/Makefile2 source/libpfk/CMakeFiles/ss_pfk.dir/all
++	$(CMAKE_COMMAND) -E cmake_progress_start /home/henri/Downloads/ike-mint19.1/ike/CMakeFiles 0
++.PHONY : source/libpfk/CMakeFiles/ss_pfk.dir/rule
++
++# Convenience name for target.
++ss_pfk: source/libpfk/CMakeFiles/ss_pfk.dir/rule
++
++.PHONY : ss_pfk
++
++# clean rule for target.
++source/libpfk/CMakeFiles/ss_pfk.dir/clean:
++	$(MAKE) -f source/libpfk/CMakeFiles/ss_pfk.dir/build.make source/libpfk/CMakeFiles/ss_pfk.dir/clean
++.PHONY : source/libpfk/CMakeFiles/ss_pfk.dir/clean
++
++# clean rule for target.
++clean: source/libpfk/CMakeFiles/ss_pfk.dir/clean
++
++.PHONY : clean
++
++#=============================================================================
++# Special targets to cleanup operation of make.
++
++# Special rule to run CMake to check the build system integrity.
++# No rule that depends on this can have commands that come from listfiles
++# because they might be regenerated.
++cmake_check_build_system:
++	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
++.PHONY : cmake_check_build_system
++
 diff -Nru -X exclude-ext ike.orig/source/iked/crypto.cpp ike/source/iked/crypto.cpp
 --- ike.orig/source/iked/crypto.cpp	2012-12-11 07:56:33.000000000 +0100
-+++ ike/source/iked/crypto.cpp	2019-01-10 17:44:02.631489567 +0100
-@@ -376,60 +376,51 @@
- 	if( dh == NULL )
- 		return false;
++++ ike/source/iked/crypto.cpp	2019-01-15 14:04:45.789988583 +0100
+@@ -370,6 +370,102 @@
+ 	0xFF, 0xFF, 0xFF, 0xFF
+ };
  
--	dh->p = NULL;
--	dh->g = NULL;
--	dh->length = 0;
--
--	//
--	// set p ( prime ) value
--	//
--
- 	unsigned char * p_data = NULL;
- 	size_t			p_size = 0;
- 
--	dh->p = BN_new();
--	if( dh->p == NULL )
--		goto dh_failed;
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
++bool dh_init( long group, DH ** dh_data, long * dh_size )
++{
++	DH * dh = DH_new();
++	if( dh == NULL )
++		return false;
++
++	//
++	// set p ( prime ) value
++	//
++
++	unsigned char * p_data = NULL;
++	size_t			p_size = 0;
++
 +    BIGNUM *member_p = BN_new();
 +    BIGNUM *member_g = BN_new();
- 
- 	switch( group )
- 	{
- 		case 1:
--			if( !BN_bin2bn( group1, sizeof( group1 ), dh->p ) )
++
++	if (member_p == NULL || member_g == NULL)
++		goto dh_failed;
++
++	switch( group )
++	{
++		case 1:
 +			if( !BN_bin2bn( group1, sizeof( group1 ), member_p ) )
- 				goto dh_failed;
- 			break;
- 
- 		case 2:
--			if( !BN_bin2bn( group2, sizeof( group2 ), dh->p ) )
++				goto dh_failed;
++			break;
++
++		case 2:
 +			if( !BN_bin2bn( group2, sizeof( group2 ), member_p ) )
- 				goto dh_failed;
- 			break;
- 
- 		case 5:
--			if( !BN_bin2bn( group5, sizeof( group5 ), dh->p ) )
++				goto dh_failed;
++			break;
++
++		case 5:
 +			if( !BN_bin2bn( group5, sizeof( group5 ), member_p ) )
- 				goto dh_failed;
- 			break;
- 
- 		case 14:
--			if( !BN_bin2bn( group14, sizeof( group14 ), dh->p ) )
++				goto dh_failed;
++			break;
++
++		case 14:
 +			if( !BN_bin2bn( group14, sizeof( group14 ), member_p ) )
- 				goto dh_failed;
- 			break;
- 
- 		case 15:
--			if( !BN_bin2bn( group15, sizeof( group15 ), dh->p ) )
++				goto dh_failed;
++			break;
++
++		case 15:
 +			if( !BN_bin2bn( group15, sizeof( group15 ), member_p ) )
- 				goto dh_failed;
- 			break;
- 
- 		case 16:
--			if( !BN_bin2bn( group16, sizeof( group16 ), dh->p ) )
++				goto dh_failed;
++			break;
++
++		case 16:
 +			if( !BN_bin2bn( group16, sizeof( group16 ), member_p ) )
- 				goto dh_failed;
- 			break;
- 
- 		case 17:
--			if( !BN_bin2bn( group17, sizeof( group17 ), dh->p ) )
++				goto dh_failed;
++			break;
++
++		case 17:
 +			if( !BN_bin2bn( group17, sizeof( group17 ), member_p ) )
- 				goto dh_failed;
- 			break;
- 
- 		case 18:
--			if( !BN_bin2bn( group18, sizeof( group18 ), dh->p ) )
++				goto dh_failed;
++			break;
++
++		case 18:
 +			if( !BN_bin2bn( group18, sizeof( group18 ), member_p ) )
- 				goto dh_failed;
- 			break;
- 
-@@ -437,17 +428,14 @@
- 			goto dh_failed;
- 	}
- 
--	//
--	// set g ( generator ) value
--	//
- 
--	dh->g = BN_new();
--	if( dh->g == NULL )
--		goto dh_failed;
-+    DH_set0_pqg(dh, member_p, NULL, NULL);
- 
--	if( !BN_set_word( dh->g, 2 ) )
++				goto dh_failed;
++			break;
++
++		default:
++			goto dh_failed;
++	}
++
++	//
++	// calc g ( generator ) value
++	//
++
 +	if( !BN_set_word( member_g, 2 ) )
- 		goto dh_failed;
- 
++		goto dh_failed;
++
++    // Set p&g
++
 +    DH_set0_pqg(dh, member_p, NULL, member_g);
 +
- 	//
- 	// generate private and public DH values
- 	//
-@@ -456,13 +444,19 @@
- 		goto dh_failed;
- 
- 	*dh_data = dh;
--	*dh_size = BN_num_bytes( dh->p );
++	//
++	// generate private and public DH values
++	//
++
++	if( !DH_generate_key( dh ) )
++		goto dh_failed;
++
++	*dh_data = dh;
 +	*dh_size = (long)BN_num_bytes( member_p );
 +
++	return true;
++
++	dh_failed:
++
 +	DH_free( dh );
-+	BN_clear_free(member_p);
-+	BN_clear_free(member_g);
- 
- 	return true;
- 
- 	dh_failed:
- 
- 	DH_free( dh );
-+	BN_clear_free(member_p);
-+	BN_clear_free(member_g);
++
++	return false;
++}
++#else
+ bool dh_init( long group, DH ** dh_data, long * dh_size )
+ {
+ 	DH * dh = DH_new();
+@@ -466,3 +562,4 @@
  
  	return false;
  }
++#endif
 diff -Nru -X exclude-ext ike.orig/source/iked/ike.cpp ike/source/iked/ike.cpp
 --- ike.orig/source/iked/ike.cpp	2009-02-12 03:35:43.000000000 +0100
-+++ ike/source/iked/ike.cpp	2019-01-10 17:56:05.421173424 +0100
-@@ -391,11 +391,11 @@
++++ ike/source/iked/ike.cpp	2019-01-14 18:53:18.049326469 +0100
+@@ -390,7 +390,43 @@
+ 	//
  	// init cipher key and iv
  	//
- 
--	EVP_CIPHER_CTX ctx_cipher;
--	EVP_CIPHER_CTX_init( &ctx_cipher );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	EVP_CIPHER_CTX * ctx_cipher;
 +	ctx_cipher = EVP_CIPHER_CTX_new();
++    EVP_CIPHER_CTX_reset(ctx_cipher);
  
- 	EVP_CipherInit_ex(
--		&ctx_cipher,
++	EVP_CipherInit_ex(
 +		ctx_cipher,
- 		sa->evp_cipher,
- 		NULL,
- 		NULL,
-@@ -403,11 +403,11 @@
- 		0 );
- 
- 	EVP_CIPHER_CTX_set_key_length(
--		&ctx_cipher,
++		sa->evp_cipher,
++		NULL,
++		NULL,
++		NULL,
++		0 );
++
++	EVP_CIPHER_CTX_set_key_length(
 +		ctx_cipher,
- 		( int ) sa->key.size() );
- 
- 	EVP_CipherInit_ex(
--		&ctx_cipher,
++		( int ) sa->key.size() );
++
++	EVP_CipherInit_ex(
 +		ctx_cipher,
- 		NULL,
- 		NULL,
- 		sa->key.buff(),
-@@ -415,16 +415,16 @@
- 		0 );
- 
- 	//
--	// decrypt all but header
- 	//
++		NULL,
++		NULL,
++		sa->key.buff(),
++		iv->buff(),
++		0 );
++
++	//
++	//
 +	// decrypt all but header
- 
- 	EVP_Cipher(
--		&ctx_cipher,
++
++	EVP_Cipher(
 +		ctx_cipher,
- 		data + sizeof( IKE_HEADER ),
- 		data + sizeof( IKE_HEADER ),
++		data + sizeof( IKE_HEADER ),
++		data + sizeof( IKE_HEADER ),
++		( int ) size - sizeof( IKE_HEADER ) );
++
++	EVP_CIPHER_CTX_free( ctx_cipher );
++#else
+ 	EVP_CIPHER_CTX ctx_cipher;
+ 	EVP_CIPHER_CTX_init( &ctx_cipher );
+ 
+@@ -425,6 +461,7 @@
  		( int ) size - sizeof( IKE_HEADER ) );
  
--	EVP_CIPHER_CTX_cleanup( &ctx_cipher );
-+	EVP_CIPHER_CTX_free( ctx_cipher );
+ 	EVP_CIPHER_CTX_cleanup( &ctx_cipher );
++#endif
  
  	log.bin(
  		LLOG_DEBUG,
-@@ -595,11 +595,12 @@
+@@ -595,6 +632,39 @@
  	// encrypt all but header
  	//
  
--	EVP_CIPHER_CTX ctx_cipher;
--	EVP_CIPHER_CTX_init( &ctx_cipher );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	EVP_CIPHER_CTX * ctx_cipher;
 +	ctx_cipher = EVP_CIPHER_CTX_new();
-+	EVP_CIPHER_CTX_init( ctx_cipher );
- 
- 	EVP_CipherInit_ex(
--		&ctx_cipher,
++	EVP_CIPHER_CTX_reset( ctx_cipher );
++
++	EVP_CipherInit_ex(
 +		ctx_cipher,
- 		sa->evp_cipher,
- 		NULL,
- 		NULL,
-@@ -607,11 +608,11 @@
- 		1 );
- 
- 	EVP_CIPHER_CTX_set_key_length(
--		&ctx_cipher,
++		sa->evp_cipher,
++		NULL,
++		NULL,
++		NULL,
++		1 );
++
++	EVP_CIPHER_CTX_set_key_length(
 +		ctx_cipher,
- 		( int ) sa->key.size() );
- 
- 	EVP_CipherInit_ex(
--		&ctx_cipher,
++		( int ) sa->key.size() );
++
++	EVP_CipherInit_ex(
 +		ctx_cipher,
- 		NULL,
- 		NULL,
- 		sa->key.buff(),
-@@ -619,12 +620,12 @@
- 		1 );
- 
- 	EVP_Cipher(
--		&ctx_cipher,
++		NULL,
++		NULL,
++		sa->key.buff(),
++		iv->buff(),
++		1 );
++
++	EVP_Cipher(
 +		ctx_cipher,
- 		data + sizeof( IKE_HEADER ),
- 		data + sizeof( IKE_HEADER ),
++		data + sizeof( IKE_HEADER ),
++		data + sizeof( IKE_HEADER ),
++		( int ) size - sizeof( IKE_HEADER ) );
++
++	EVP_CIPHER_CTX_free( ctx_cipher );
++#else
+ 	EVP_CIPHER_CTX ctx_cipher;
+ 	EVP_CIPHER_CTX_init( &ctx_cipher );
+ 
+@@ -625,6 +695,7 @@
  		( int ) size - sizeof( IKE_HEADER ) );
  
--	EVP_CIPHER_CTX_cleanup( &ctx_cipher );
-+	EVP_CIPHER_CTX_free( ctx_cipher );
+ 	EVP_CIPHER_CTX_cleanup( &ctx_cipher );
++#endif
  
  	//
  	// store cipher iv data
 diff -Nru -X exclude-ext ike.orig/source/iked/ike.exch.config.cpp ike/source/iked/ike.exch.config.cpp
 --- ike.orig/source/iked/ike.exch.config.cpp	2013-04-07 18:28:06.000000000 +0200
-+++ ike/source/iked/ike.exch.config.cpp	2019-01-10 17:51:47.959155627 +0100
-@@ -2481,15 +2481,15 @@
++++ ike/source/iked/ike.exch.config.cpp	2019-01-14 18:52:14.596804255 +0100
+@@ -2481,6 +2481,18 @@
  	BDATA hash_c;
  	hash_c.size( ph1->hash_size );
  
--	HMAC_CTX ctx_prf;
--	HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	HMAC_CTX * ctx_prf;
 +	ctx_prf = HMAC_CTX_new();
- 
--	HMAC_Init_ex( &ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
--	HMAC_Update( &ctx_prf, ( unsigned char * ) &msgid, 4 );
--	HMAC_Update( &ctx_prf, cfg->hda.buff(), cfg->hda.size() );
--	HMAC_Final( &ctx_prf, hash_c.buff(), NULL );
++    HMAC_CTX_reset(ctx_prf);
++
 +	HMAC_Init_ex( ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
 +	HMAC_Update( ctx_prf, ( unsigned char * ) &msgid, 4 );
 +	HMAC_Update( ctx_prf, cfg->hda.buff(), cfg->hda.size() );
 +	HMAC_Final( ctx_prf, hash_c.buff(), NULL );
- 
--	HMAC_CTX_cleanup( &ctx_prf );
++
 +	HMAC_CTX_free( ctx_prf );
++#else	
+ 	HMAC_CTX ctx_prf;
+ 	HMAC_CTX_init( &ctx_prf );
+ 
+@@ -2490,6 +2502,7 @@
+ 	HMAC_Final( &ctx_prf, hash_c.buff(), NULL );
+ 
+ 	HMAC_CTX_cleanup( &ctx_prf );
++#endif
  
  	log.bin(
  		LLOG_DEBUG,
-@@ -2543,15 +2543,15 @@
+@@ -2543,6 +2556,18 @@
  	// create message authentication hash
  	//
  
--	HMAC_CTX ctx_prf;
--	HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	HMAC_CTX * ctx_prf;
 +	ctx_prf = HMAC_CTX_new();
- 
--	HMAC_Init_ex( &ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
--	HMAC_Update( &ctx_prf, ( unsigned char * ) &cfg->msgid, sizeof( cfg->msgid ) );
--	HMAC_Update( &ctx_prf, packet.buff() + beg, end - beg );
--	HMAC_Final( &ctx_prf, hash.buff(), 0 );
++    HMAC_CTX_reset(ctx_prf);
++
 +	HMAC_Init_ex( ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
 +	HMAC_Update( ctx_prf, ( unsigned char * ) &cfg->msgid, sizeof( cfg->msgid ) );
 +	HMAC_Update( ctx_prf, packet.buff() + beg, end - beg );
 +	HMAC_Final( ctx_prf, hash.buff(), 0 );
- 
--	HMAC_CTX_cleanup( &ctx_prf );
++
 +	HMAC_CTX_free( ctx_prf );
++#else
+ 	HMAC_CTX ctx_prf;
+ 	HMAC_CTX_init( &ctx_prf );
+ 
+@@ -2552,6 +2577,7 @@
+ 	HMAC_Final( &ctx_prf, hash.buff(), 0 );
+ 
+ 	HMAC_CTX_cleanup( &ctx_prf );
++#endif
  
  	memcpy( packet.buff() + off + 4, hash.buff(), hash.size() );
  
 diff -Nru -X exclude-ext ike.orig/source/iked/ike.exch.inform.cpp ike/source/iked/ike.exch.inform.cpp
 --- ike.orig/source/iked/ike.exch.inform.cpp	2010-12-02 17:06:10.000000000 +0100
-+++ ike/source/iked/ike.exch.inform.cpp	2019-01-10 17:59:10.226512560 +0100
-@@ -399,15 +399,15 @@
++++ ike/source/iked/ike.exch.inform.cpp	2019-01-14 18:52:40.037013579 +0100
+@@ -399,6 +399,18 @@
  	BDATA hash_c;
  	hash_c.size( ph1->hash_size );
  
--	HMAC_CTX ctx_prf;
--	HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	HMAC_CTX * ctx_prf;
 +	ctx_prf = HMAC_CTX_new();
- 
--	HMAC_Init_ex( &ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
--	HMAC_Update( &ctx_prf, ( unsigned char * ) &inform->msgid, 4 );
--	HMAC_Update( &ctx_prf, inform->hda.buff(), inform->hda.size() );
--	HMAC_Final( &ctx_prf, hash_c.buff(), NULL );
++    HMAC_CTX_reset(ctx_prf);
++
 +	HMAC_Init_ex( ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
 +	HMAC_Update( ctx_prf, ( unsigned char * ) &inform->msgid, 4 );
 +	HMAC_Update( ctx_prf, inform->hda.buff(), inform->hda.size() );
 +	HMAC_Final( ctx_prf, hash_c.buff(), NULL );
- 
--	HMAC_CTX_cleanup( &ctx_prf );
++
 +	HMAC_CTX_free( ctx_prf );
++#else
+ 	HMAC_CTX ctx_prf;
+ 	HMAC_CTX_init( &ctx_prf );
+ 
+@@ -408,6 +420,7 @@
+ 	HMAC_Final( &ctx_prf, hash_c.buff(), NULL );
+ 
+ 	HMAC_CTX_cleanup( &ctx_prf );
++#endif
  
  	log.bin(
  		LLOG_DEBUG,
-@@ -439,15 +439,15 @@
+@@ -439,6 +452,18 @@
  {
  	inform->hash_l.size( ph1->hash_size );
  
--	HMAC_CTX ctx_prf;
--	HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	HMAC_CTX * ctx_prf;
 +	ctx_prf = HMAC_CTX_new();
- 
--	HMAC_Init_ex( &ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
--	HMAC_Update( &ctx_prf, ( unsigned char * ) &inform->msgid, sizeof( inform->msgid ) );
--	HMAC_Update( &ctx_prf, inform->hda.buff(), inform->hda.size() );
--	HMAC_Final( &ctx_prf, inform->hash_l.buff(), 0 );
++    HMAC_CTX_reset(ctx_prf);
++
 +	HMAC_Init_ex( ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
 +	HMAC_Update( ctx_prf, ( unsigned char * ) &inform->msgid, sizeof( inform->msgid ) );
 +	HMAC_Update( ctx_prf, inform->hda.buff(), inform->hda.size() );
 +	HMAC_Final( ctx_prf, inform->hash_l.buff(), 0 );
- 
--	HMAC_CTX_cleanup( &ctx_prf );
++
 +	HMAC_CTX_free( ctx_prf );
++#else
+ 	HMAC_CTX ctx_prf;
+ 	HMAC_CTX_init( &ctx_prf );
+ 
+@@ -448,6 +473,7 @@
+ 	HMAC_Final( &ctx_prf, inform->hash_l.buff(), 0 );
+ 
+ 	HMAC_CTX_cleanup( &ctx_prf );
++#endif
  
  	log.bin(
  		LLOG_DEBUG,
 diff -Nru -X exclude-ext ike.orig/source/iked/ike.exch.phase1.cpp ike/source/iked/ike.exch.phase1.cpp
 --- ike.orig/source/iked/ike.exch.phase1.cpp	2012-02-08 06:09:35.000000000 +0100
-+++ ike/source/iked/ike.exch.phase1.cpp	2019-01-10 18:10:30.956331182 +0100
-@@ -1044,14 +1044,13 @@
++++ ike/source/iked/ike.exch.phase1.cpp	2019-01-15 09:41:10.375465281 +0100
+@@ -1044,6 +1044,17 @@
  								BDATA psk_hash;
  								psk_hash.size( ph1->hash_size );
  
--								HMAC_CTX ctx_prf;
--								HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +								HMAC_CTX * ctx_prf;
- 
--								HMAC_Init_ex( &ctx_prf, ph1->skeyid.buff(), ( int ) ph1->skeyid.size(), ph1->evp_hash, NULL );
--								HMAC_Update( &ctx_prf, ph1->tunnel->peer->psk.buff(), ph1->tunnel->peer->psk.size() );
--								HMAC_Final( &ctx_prf, psk_hash.buff(), NULL );
++								ctx_prf = HMAC_CTX_new();
++								HMAC_CTX_reset( ctx_prf );
++
 +								HMAC_Init_ex( ctx_prf, ph1->skeyid.buff(), ( int ) ph1->skeyid.size(), ph1->evp_hash, NULL );
 +								HMAC_Update( ctx_prf, ph1->tunnel->peer->psk.buff(), ph1->tunnel->peer->psk.size() );
 +								HMAC_Final( ctx_prf, psk_hash.buff(), NULL );
- 
--								HMAC_CTX_cleanup( &ctx_prf );
++
 +								HMAC_CTX_free( ctx_prf );
++#else
+ 								HMAC_CTX ctx_prf;
+ 								HMAC_CTX_init( &ctx_prf );
+ 
+@@ -1052,6 +1063,7 @@
+ 								HMAC_Final( &ctx_prf, psk_hash.buff(), NULL );
+ 
+ 								HMAC_CTX_cleanup( &ctx_prf );
++#endif
  
  								//
  								// add the notification payload
-@@ -1557,7 +1556,10 @@
+@@ -1557,7 +1569,13 @@
  	{
  		BDATA prv;
  		prv.size( ph1->dh_size );
--		BN_bn2bin( ph1->dh->priv_key, prv.buff() );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +        const BIGNUM *private_key;
-+
 +		DH_get0_key(ph1->dh, NULL, &private_key);
 +		BN_bn2bin( private_key, prv.buff() );
++#else
+ 		BN_bn2bin( ph1->dh->priv_key, prv.buff() );
++#endif
  
  		log.bin(
  			LLOG_DECODE,
-@@ -1656,25 +1658,24 @@
+@@ -1656,6 +1674,28 @@
  		case XAUTH_AUTH_INIT_PSK:
  		case XAUTH_AUTH_RESP_PSK:
  		{
--			HMAC_CTX ctx_prf;
--			HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +			HMAC_CTX * ctx_prf;
- 
--			HMAC_Init_ex( &ctx_prf, ph1->tunnel->peer->psk.buff(), ( int ) ph1->tunnel->peer->psk.size(), ph1->evp_hash, NULL );
++            ctx_prf = HMAC_CTX_new();
++			HMAC_CTX_reset( ctx_prf );
++
 +			HMAC_Init_ex( ctx_prf, ph1->tunnel->peer->psk.buff(), ( int ) ph1->tunnel->peer->psk.size(), ph1->evp_hash, NULL );
- 
- 			if( ph1->initiator )
- 			{
--				HMAC_Update( &ctx_prf, ph1->nonce_l.buff(), ph1->nonce_l.size() );
--				HMAC_Update( &ctx_prf, ph1->nonce_r.buff(), ph1->nonce_r.size() );
++
++			if( ph1->initiator )
++			{
 +				HMAC_Update( ctx_prf, ph1->nonce_l.buff(), ph1->nonce_l.size() );
 +				HMAC_Update( ctx_prf, ph1->nonce_r.buff(), ph1->nonce_r.size() );
- 			}
- 			else
- 			{
--				HMAC_Update( &ctx_prf, ph1->nonce_r.buff(), ph1->nonce_r.size() );
--				HMAC_Update( &ctx_prf, ph1->nonce_l.buff(), ph1->nonce_l.size() );
++			}
++			else
++			{
 +				HMAC_Update( ctx_prf, ph1->nonce_r.buff(), ph1->nonce_r.size() );
 +				HMAC_Update( ctx_prf, ph1->nonce_l.buff(), ph1->nonce_l.size() );
- 			}
- 
--			HMAC_Final( &ctx_prf, skeyid_data, NULL );
++			}
++
 +			HMAC_Final( ctx_prf, skeyid_data, NULL );
- 
--			HMAC_CTX_cleanup( &ctx_prf );
++
 +			HMAC_CTX_free( ctx_prf );
++#else
+ 			HMAC_CTX ctx_prf;
+ 			HMAC_CTX_init( &ctx_prf );
  
+@@ -1675,7 +1715,7 @@
+ 			HMAC_Final( &ctx_prf, skeyid_data, NULL );
+ 
+ 			HMAC_CTX_cleanup( &ctx_prf );
+-
++#endif
  			break;
  		}
-@@ -1704,14 +1705,13 @@
+ 
+@@ -1704,6 +1744,17 @@
  				nonce.add( ph1->nonce_l );
  			}
  
--			HMAC_CTX ctx_prf;
--			HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +			HMAC_CTX * ctx_prf;
- 
--			HMAC_Init_ex( &ctx_prf, nonce.buff(), ( int ) nonce.size(), ph1->evp_hash, NULL );
--			HMAC_Update( &ctx_prf, shared.buff(), shared.size() );
--			HMAC_Final( &ctx_prf, skeyid_data, NULL );
++			ctx_prf = HMAC_CTX_new();
++			HMAC_CTX_reset( ctx_prf );
++
 +			HMAC_Init_ex( ctx_prf, nonce.buff(), ( int ) nonce.size(), ph1->evp_hash, NULL );
 +			HMAC_Update( ctx_prf, shared.buff(), shared.size() );
 +			HMAC_Final( ctx_prf, skeyid_data, NULL );
- 
--			HMAC_CTX_cleanup( &ctx_prf );
++
 +			HMAC_CTX_free( ctx_prf );
++#else
+ 			HMAC_CTX ctx_prf;
+ 			HMAC_CTX_init( &ctx_prf );
  
+@@ -1712,7 +1763,7 @@
+ 			HMAC_Final( &ctx_prf, skeyid_data, NULL );
+ 
+ 			HMAC_CTX_cleanup( &ctx_prf );
+-
++#endif
  			break;
  		}	
-@@ -1730,15 +1730,14 @@
+ 	}
+@@ -1730,6 +1781,119 @@
  	// compute SKEYID_d
  	//
  
--	HMAC_CTX ctx_prf;
--	HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	HMAC_CTX * ctx_prf;
- 
--	HMAC_Init_ex( &ctx_prf, ph1->skeyid.buff(), ( int ) ph1->skeyid.size(), ph1->evp_hash, NULL );
--	HMAC_Update( &ctx_prf, shared.buff(), shared.size() );
--	HMAC_Update( &ctx_prf, ph1->cookies.i, ISAKMP_COOKIE_SIZE );
--	HMAC_Update( &ctx_prf, ph1->cookies.r, ISAKMP_COOKIE_SIZE );
--	HMAC_Update( &ctx_prf, ( unsigned char * ) "\0", 1 );
--	HMAC_Final( &ctx_prf, skeyid_data, NULL );
++	ctx_prf = HMAC_CTX_new();
++	HMAC_CTX_reset( ctx_prf );
++
 +	HMAC_Init_ex( ctx_prf, ph1->skeyid.buff(), ( int ) ph1->skeyid.size(), ph1->evp_hash, NULL );
 +	HMAC_Update( ctx_prf, shared.buff(), shared.size() );
 +	HMAC_Update( ctx_prf, ph1->cookies.i, ISAKMP_COOKIE_SIZE );
 +	HMAC_Update( ctx_prf, ph1->cookies.r, ISAKMP_COOKIE_SIZE );
 +	HMAC_Update( ctx_prf, ( unsigned char * ) "\0", 1 );
 +	HMAC_Final( ctx_prf, skeyid_data, NULL );
- 
- 	ph1->skeyid_d.set( skeyid_data, skeyid_size );
- 
-@@ -1753,13 +1752,13 @@
- 	// compute SKEYID_a
- 	//
- 
--	HMAC_Init_ex( &ctx_prf, ph1->skeyid.buff(), ( int ) ph1->skeyid.size(), ph1->evp_hash, NULL );
--	HMAC_Update( &ctx_prf, skeyid_data, skeyid_size );
--	HMAC_Update( &ctx_prf, shared.buff(), shared.size() );
--	HMAC_Update( &ctx_prf, ph1->cookies.i, ISAKMP_COOKIE_SIZE );
--	HMAC_Update( &ctx_prf, ph1->cookies.r, ISAKMP_COOKIE_SIZE );
--	HMAC_Update( &ctx_prf, ( unsigned char * ) "\1", 1 );
--	HMAC_Final( &ctx_prf, skeyid_data, NULL );
++
++	ph1->skeyid_d.set( skeyid_data, skeyid_size );
++
++	log.bin(
++		LLOG_DEBUG,
++		LLOG_DECODE,
++		skeyid_data,
++		skeyid_size,
++		"== : SETKEYID_d" );
++
++	//
++	// compute SKEYID_a
++	//
++
 +	HMAC_Init_ex( ctx_prf, ph1->skeyid.buff(), ( int ) ph1->skeyid.size(), ph1->evp_hash, NULL );
 +	HMAC_Update( ctx_prf, skeyid_data, skeyid_size );
 +	HMAC_Update( ctx_prf, shared.buff(), shared.size() );
@@ -440,20 +3330,20 @@ diff -Nru -X exclude-ext ike.orig/source/iked/ike.exch.phase1.cpp ike/source/ike
 +	HMAC_Update( ctx_prf, ph1->cookies.r, ISAKMP_COOKIE_SIZE );
 +	HMAC_Update( ctx_prf, ( unsigned char * ) "\1", 1 );
 +	HMAC_Final( ctx_prf, skeyid_data, NULL );
- 
- 	ph1->skeyid_a.set( skeyid_data, skeyid_size );
- 
-@@ -1774,13 +1773,13 @@
- 	// compute SKEYID_e
- 	//
- 
--	HMAC_Init_ex( &ctx_prf, ph1->skeyid.buff(), ( int ) ph1->skeyid.size(), ph1->evp_hash, NULL );
--	HMAC_Update( &ctx_prf, skeyid_data, skeyid_size );
--	HMAC_Update( &ctx_prf, shared.buff(), shared.size() );
--	HMAC_Update( &ctx_prf, ph1->cookies.i, ISAKMP_COOKIE_SIZE );
--	HMAC_Update( &ctx_prf, ph1->cookies.r, ISAKMP_COOKIE_SIZE );
--	HMAC_Update( &ctx_prf, ( unsigned char * ) "\2", 1 );
--	HMAC_Final( &ctx_prf, skeyid_data, NULL );
++
++	ph1->skeyid_a.set( skeyid_data, skeyid_size );
++
++	log.bin(
++		LLOG_DEBUG,
++		LLOG_DECODE,
++		skeyid_data,
++		skeyid_size,
++		"== : SETKEYID_a" );
++
++	//
++	// compute SKEYID_e
++	//
++
 +	HMAC_Init_ex( ctx_prf, ph1->skeyid.buff(), ( int ) ph1->skeyid.size(), ph1->evp_hash, NULL );
 +	HMAC_Update( ctx_prf, skeyid_data, skeyid_size );
 +	HMAC_Update( ctx_prf, shared.buff(), shared.size() );
@@ -461,170 +3351,198 @@ diff -Nru -X exclude-ext ike.orig/source/iked/ike.exch.phase1.cpp ike/source/ike
 +	HMAC_Update( ctx_prf, ph1->cookies.r, ISAKMP_COOKIE_SIZE );
 +	HMAC_Update( ctx_prf, ( unsigned char * ) "\2", 1 );
 +	HMAC_Final( ctx_prf, skeyid_data, NULL );
- 
- 	ph1->skeyid_e.set( skeyid_data, skeyid_size );
- 
-@@ -1821,15 +1820,15 @@
- 
- 		// create extended key data
- 
--		HMAC_Init_ex( &ctx_prf, skeyid_data, skeyid_size, ph1->evp_hash, NULL );
--		HMAC_Update( &ctx_prf, ( unsigned char * ) "\0", 1 );
--		HMAC_Final( &ctx_prf, key_data, NULL );
++
++	ph1->skeyid_e.set( skeyid_data, skeyid_size );
++
++	log.bin(
++		LLOG_DEBUG,
++		LLOG_DECODE,
++		skeyid_data,
++		skeyid_size,
++		"== : SETKEYID_e" );
++
++	//
++	// clobber dh shared secret
++	//
++
++	shared.del( true );
++
++	// compute cipher key data
++
++	unsigned char	key_data[ EVP_MAX_KEY_LENGTH + HMAC_MAX_MD_CBLOCK ];
++	long			key_size = EVP_CIPHER_key_length( ph1->evp_cipher );
++
++	if( proposal->ciph_kl )
++		key_size = ( proposal->ciph_kl + 7 ) / 8;
++
++	//
++	// if the cipher requires more key material
++	// than SKEYID_e provides, extend it using
++	// a recursive algorithm
++	//
++
++	if( skeyid_size < key_size )
++	{
++		// grow our key to be a multiple
++		// of SKEYID_e ( HMAC block size )
++
++		if( key_size % skeyid_size )
++			key_size += skeyid_size - ( key_size % skeyid_size );
++
++		// create extended key data
++
 +		HMAC_Init_ex( ctx_prf, skeyid_data, skeyid_size, ph1->evp_hash, NULL );
 +		HMAC_Update( ctx_prf, ( unsigned char * ) "\0", 1 );
 +		HMAC_Final( ctx_prf, key_data, NULL );
- 
- 		for( long size = skeyid_size; size < key_size; size += skeyid_size )
- 		{
--			HMAC_Init_ex( &ctx_prf, skeyid_data, skeyid_size, ph1->evp_hash, NULL );
--			HMAC_Update( &ctx_prf, key_data + size - skeyid_size, skeyid_size );
--			HMAC_Final( &ctx_prf, key_data + size, NULL );
++
++		for( long size = skeyid_size; size < key_size; size += skeyid_size )
++		{
 +			HMAC_Init_ex( ctx_prf, skeyid_data, skeyid_size, ph1->evp_hash, NULL );
 +			HMAC_Update( ctx_prf, key_data + size - skeyid_size, skeyid_size );
 +			HMAC_Final( ctx_prf, key_data + size, NULL );
- 		}
- 	}
- 	else
-@@ -1839,7 +1838,7 @@
- 		memcpy( key_data, skeyid_data, key_size );
++		}
++	}
++	else
++	{
++		// copy the key data
++
++		memcpy( key_data, skeyid_data, key_size );
++	}
++
++	HMAC_CTX_free( ctx_prf );
++#else
+ 	HMAC_CTX ctx_prf;
+ 	HMAC_CTX_init( &ctx_prf );
+ 
+@@ -1840,6 +2004,7 @@
  	}
  
--	HMAC_CTX_cleanup( &ctx_prf );
-+	HMAC_CTX_free( ctx_prf );
+ 	HMAC_CTX_cleanup( &ctx_prf );
++#endif
  
  	if( proposal->ciph_kl )
  		key_size = ( proposal->ciph_kl + 7 ) / 8;
-@@ -1860,22 +1859,23 @@
+@@ -1860,6 +2025,25 @@
  	unsigned char iv_data[ HMAC_MAX_MD_CBLOCK ];
  	unsigned long iv_size = EVP_CIPHER_iv_length( ph1->evp_cipher );
  
--	EVP_MD_CTX ctx_hash;
--	EVP_DigestInit( &ctx_hash, ph1->evp_hash );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	EVP_MD_CTX * ctx_hash;
 +	ctx_hash = EVP_MD_CTX_new();
 +	EVP_DigestInit( ctx_hash, ph1->evp_hash );
- 
- 	if( ph1->initiator )
- 	{
--		EVP_DigestUpdate( &ctx_hash, ph1->xl.buff(), ph1->xl.size() );
--		EVP_DigestUpdate( &ctx_hash, ph1->xr.buff(), ph1->xr.size() );
++
++	if( ph1->initiator )
++	{
 +		EVP_DigestUpdate( ctx_hash, ph1->xl.buff(), ph1->xl.size() );
 +		EVP_DigestUpdate( ctx_hash, ph1->xr.buff(), ph1->xr.size() );
- 	}
- 	else
- 	{
--		EVP_DigestUpdate( &ctx_hash, ph1->xr.buff(), ph1->xr.size() );
--		EVP_DigestUpdate( &ctx_hash, ph1->xl.buff(), ph1->xl.size() );
++	}
++	else
++	{
 +		EVP_DigestUpdate( ctx_hash, ph1->xr.buff(), ph1->xr.size() );
 +		EVP_DigestUpdate( ctx_hash, ph1->xl.buff(), ph1->xl.size() );
- 	}
- 
--	EVP_DigestFinal( &ctx_hash, iv_data, NULL );
--	EVP_MD_CTX_cleanup( &ctx_hash );
++	}
++
 +	EVP_DigestFinal( ctx_hash, iv_data, NULL );
-+	EVP_MD_CTX_free( ctx_hash );
++	EVP_MD_CTX_reset( ctx_hash );
++#else
+ 	EVP_MD_CTX ctx_hash;
+ 	EVP_DigestInit( &ctx_hash, ph1->evp_hash );
+ 
+@@ -1876,6 +2060,7 @@
+ 
+ 	EVP_DigestFinal( &ctx_hash, iv_data, NULL );
+ 	EVP_MD_CTX_cleanup( &ctx_hash );
++#endif
  
  	ph1->iv.set( iv_data, iv_size );
  
-@@ -1903,29 +1903,29 @@
+@@ -1903,6 +2088,32 @@
  
  	hash.size( sa->hash_size );
  
--	HMAC_CTX ctx_prf;
--	HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	HMAC_CTX * ctx_prf;
 +	ctx_prf = HMAC_CTX_new();
- 
--	HMAC_Init_ex( &ctx_prf, sa->skeyid.buff(), ( int ) sa->skeyid.size(), sa->evp_hash, NULL );
++	HMAC_CTX_reset( ctx_prf );
++
 +	HMAC_Init_ex( ctx_prf, sa->skeyid.buff(), ( int ) sa->skeyid.size(), sa->evp_hash, NULL );
- 
- 	if( sa->initiator )
- 	{
--		HMAC_Update( &ctx_prf, sa->xl.buff(), sa->xl.size() );
--		HMAC_Update( &ctx_prf, sa->xr.buff(), sa->xr.size() );
++
++	if( sa->initiator )
++	{
 +		HMAC_Update( ctx_prf, sa->xl.buff(), sa->xl.size() );
 +		HMAC_Update( ctx_prf, sa->xr.buff(), sa->xr.size() );
- 	}
- 	else
- 	{
--		HMAC_Update( &ctx_prf, sa->xr.buff(), sa->xr.size() );
--		HMAC_Update( &ctx_prf, sa->xl.buff(), sa->xl.size() );
++	}
++	else
++	{
 +		HMAC_Update( ctx_prf, sa->xr.buff(), sa->xr.size() );
 +		HMAC_Update( ctx_prf, sa->xl.buff(), sa->xl.size() );
- 	}
- 
--	HMAC_Update( &ctx_prf, sa->cookies.i, ISAKMP_COOKIE_SIZE );
--	HMAC_Update( &ctx_prf, sa->cookies.r, ISAKMP_COOKIE_SIZE );
--	HMAC_Update( &ctx_prf, sa->hda.buff(), sa->hda.size() );
--	HMAC_Update( &ctx_prf, sa->idi.buff(), sa->idi.size() );
--	HMAC_Final( &ctx_prf, hash.buff(), NULL );
++	}
++
 +	HMAC_Update( ctx_prf, sa->cookies.i, ISAKMP_COOKIE_SIZE );
 +	HMAC_Update( ctx_prf, sa->cookies.r, ISAKMP_COOKIE_SIZE );
 +	HMAC_Update( ctx_prf, sa->hda.buff(), sa->hda.size() );
 +	HMAC_Update( ctx_prf, sa->idi.buff(), sa->idi.size() );
 +	HMAC_Final( ctx_prf, hash.buff(), NULL );
- 
--	HMAC_CTX_cleanup( &ctx_prf );
++
 +	HMAC_CTX_free( ctx_prf );
++#else
+ 	HMAC_CTX ctx_prf;
+ 	HMAC_CTX_init( &ctx_prf );
+ 
+@@ -1926,6 +2137,7 @@
+ 	HMAC_Final( &ctx_prf, hash.buff(), NULL );
+ 
+ 	HMAC_CTX_cleanup( &ctx_prf );
++#endif
  
  	log.bin(
  		LLOG_DEBUG,
-@@ -1945,29 +1945,29 @@
+@@ -1945,6 +2157,32 @@
  
  	hash.size( sa->hash_size );
  
--	HMAC_CTX ctx_prf;
--	HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	HMAC_CTX * ctx_prf;
 +	ctx_prf = HMAC_CTX_new();
- 
--	HMAC_Init_ex( &ctx_prf, sa->skeyid.buff(), ( int ) sa->skeyid.size(), sa->evp_hash, NULL );
++	HMAC_CTX_reset( ctx_prf );
++
 +	HMAC_Init_ex( ctx_prf, sa->skeyid.buff(), ( int ) sa->skeyid.size(), sa->evp_hash, NULL );
- 
- 	if( sa->initiator )
- 	{
--		HMAC_Update( &ctx_prf, sa->xr.buff(), sa->xr.size() );
--		HMAC_Update( &ctx_prf, sa->xl.buff(), sa->xl.size() );
++
++	if( sa->initiator )
++	{
 +		HMAC_Update( ctx_prf, sa->xr.buff(), sa->xr.size() );
 +		HMAC_Update( ctx_prf, sa->xl.buff(), sa->xl.size() );
- 	}
- 	else
- 	{
--		HMAC_Update( &ctx_prf, sa->xl.buff(), sa->xl.size() );
--		HMAC_Update( &ctx_prf, sa->xr.buff(), sa->xr.size() );
++	}
++	else
++	{
 +		HMAC_Update( ctx_prf, sa->xl.buff(), sa->xl.size() );
 +		HMAC_Update( ctx_prf, sa->xr.buff(), sa->xr.size() );
- 	}
- 
--	HMAC_Update( &ctx_prf, sa->cookies.r, ISAKMP_COOKIE_SIZE );
--	HMAC_Update( &ctx_prf, sa->cookies.i, ISAKMP_COOKIE_SIZE );
--	HMAC_Update( &ctx_prf, sa->hda.buff(), sa->hda.size() );
--	HMAC_Update( &ctx_prf, sa->idr.buff(), sa->idr.size() );
--	HMAC_Final( &ctx_prf, hash.buff(), NULL );
++	}
++
 +	HMAC_Update( ctx_prf, sa->cookies.r, ISAKMP_COOKIE_SIZE );
 +	HMAC_Update( ctx_prf, sa->cookies.i, ISAKMP_COOKIE_SIZE );
 +	HMAC_Update( ctx_prf, sa->hda.buff(), sa->hda.size() );
 +	HMAC_Update( ctx_prf, sa->idr.buff(), sa->idr.size() );
 +	HMAC_Final( ctx_prf, hash.buff(), NULL );
- 
--	HMAC_CTX_cleanup( &ctx_prf );
++
 +	HMAC_CTX_free( ctx_prf );
++#else
+ 	HMAC_CTX ctx_prf;
+ 	HMAC_CTX_init( &ctx_prf );
+ 
+@@ -1968,6 +2206,7 @@
+ 	HMAC_Final( &ctx_prf, hash.buff(), NULL );
+ 
+ 	HMAC_CTX_cleanup( &ctx_prf );
++#endif
  
  	log.bin(
  		LLOG_DEBUG,
-@@ -2569,14 +2569,15 @@
+@@ -2569,6 +2808,17 @@
  	// hash for remote address
  	//
  
--	EVP_MD_CTX ctx_hash;
--	EVP_DigestInit( &ctx_hash, ph1->evp_hash );
--	EVP_DigestUpdate( &ctx_hash, ph1->cookies.i, ISAKMP_COOKIE_SIZE );
--	EVP_DigestUpdate( &ctx_hash, ph1->cookies.r, ISAKMP_COOKIE_SIZE );
--	EVP_DigestUpdate( &ctx_hash, &ph1->tunnel->saddr_r.saddr4.sin_addr.s_addr, 4 );
--	EVP_DigestUpdate( &ctx_hash, &ph1->tunnel->saddr_r.saddr4.sin_port, 2 );
--	EVP_DigestFinal( &ctx_hash, natd.buff(), NULL );
--	EVP_MD_CTX_cleanup( &ctx_hash );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	EVP_MD_CTX * ctx_hash;
 +	ctx_hash = EVP_MD_CTX_new();
 +	EVP_DigestInit( ctx_hash, ph1->evp_hash );
@@ -634,20 +3552,23 @@ diff -Nru -X exclude-ext ike.orig/source/iked/ike.exch.phase1.cpp ike/source/ike
 +	EVP_DigestUpdate( ctx_hash, &ph1->tunnel->saddr_r.saddr4.sin_port, 2 );
 +	EVP_DigestFinal( ctx_hash, natd.buff(), NULL );
 +	EVP_MD_CTX_free( ctx_hash );
++#else
+ 	EVP_MD_CTX ctx_hash;
+ 	EVP_DigestInit( &ctx_hash, ph1->evp_hash );
+ 	EVP_DigestUpdate( &ctx_hash, ph1->cookies.i, ISAKMP_COOKIE_SIZE );
+@@ -2577,6 +2827,7 @@
+ 	EVP_DigestUpdate( &ctx_hash, &ph1->tunnel->saddr_r.saddr4.sin_port, 2 );
+ 	EVP_DigestFinal( &ctx_hash, natd.buff(), NULL );
+ 	EVP_MD_CTX_cleanup( &ctx_hash );
++#endif
  
  	ph1->natd_hash_l.add( natd );
  
-@@ -2585,13 +2586,14 @@
+@@ -2585,6 +2836,16 @@
  	// hash for local address
  	//
  
--	EVP_DigestInit( &ctx_hash, ph1->evp_hash );
--	EVP_DigestUpdate( &ctx_hash, ph1->cookies.i, ISAKMP_COOKIE_SIZE );
--	EVP_DigestUpdate( &ctx_hash, ph1->cookies.r, ISAKMP_COOKIE_SIZE );
--	EVP_DigestUpdate( &ctx_hash, &ph1->tunnel->saddr_l.saddr4.sin_addr.s_addr, 4 );
--	EVP_DigestUpdate( &ctx_hash, &ph1->tunnel->saddr_l.saddr4.sin_port, 2 );
--	EVP_DigestFinal( &ctx_hash, natd.buff(), NULL );
--	EVP_MD_CTX_cleanup( &ctx_hash );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	ctx_hash = EVP_MD_CTX_new();
 +	EVP_DigestInit( ctx_hash, ph1->evp_hash );
 +	EVP_DigestUpdate( ctx_hash, ph1->cookies.i, ISAKMP_COOKIE_SIZE );
@@ -656,886 +3577,395 @@ diff -Nru -X exclude-ext ike.orig/source/iked/ike.exch.phase1.cpp ike/source/ike
 +	EVP_DigestUpdate( ctx_hash, &ph1->tunnel->saddr_l.saddr4.sin_port, 2 );
 +	EVP_DigestFinal( ctx_hash, natd.buff(), NULL );
 +	EVP_MD_CTX_free( ctx_hash );
++#else
+ 	EVP_DigestInit( &ctx_hash, ph1->evp_hash );
+ 	EVP_DigestUpdate( &ctx_hash, ph1->cookies.i, ISAKMP_COOKIE_SIZE );
+ 	EVP_DigestUpdate( &ctx_hash, ph1->cookies.r, ISAKMP_COOKIE_SIZE );
+@@ -2592,6 +2853,7 @@
+ 	EVP_DigestUpdate( &ctx_hash, &ph1->tunnel->saddr_l.saddr4.sin_port, 2 );
+ 	EVP_DigestFinal( &ctx_hash, natd.buff(), NULL );
+ 	EVP_MD_CTX_cleanup( &ctx_hash );
++#endif
  
  	ph1->natd_hash_l.add( natd );
  
 diff -Nru -X exclude-ext ike.orig/source/iked/ike.exch.phase2.cpp ike/source/iked/ike.exch.phase2.cpp
 --- ike.orig/source/iked/ike.exch.phase2.cpp	2010-12-22 22:35:36.000000000 +0100
-+++ ike/source/iked/ike.exch.phase2.cpp	2019-01-11 16:10:03.407126752 +0100
-@@ -1008,14 +1008,14 @@
++++ ike/source/iked/ike.exch.phase2.cpp	2019-01-15 10:04:45.612199196 +0100
+@@ -1008,6 +1008,17 @@
  
  	hash.size( ph1->hash_size );
  
--	HMAC_CTX ctx_prf;
--	HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	HMAC_CTX * ctx_prf;
 +	ctx_prf = HMAC_CTX_new();
- 
--	HMAC_Init_ex( &ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
--	HMAC_Update( &ctx_prf, input.buff(), input.size() );
--	HMAC_Final( &ctx_prf, hash.buff(), NULL );
++	HMAC_CTX_reset( ctx_prf );
++
 +	HMAC_Init_ex( ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
 +	HMAC_Update( ctx_prf, input.buff(), input.size() );
 +	HMAC_Final( ctx_prf, hash.buff(), NULL );
- 
--	HMAC_CTX_cleanup( &ctx_prf );
++
 +	HMAC_CTX_free( ctx_prf );
++#else
+ 	HMAC_CTX ctx_prf;
+ 	HMAC_CTX_init( &ctx_prf );
+ 
+@@ -1016,6 +1027,7 @@
+ 	HMAC_Final( &ctx_prf, hash.buff(), NULL );
+ 
+ 	HMAC_CTX_cleanup( &ctx_prf );
++#endif
  
  	log.bin(
  		LLOG_DEBUG,
-@@ -1048,14 +1048,14 @@
+@@ -1048,6 +1060,17 @@
  
  	hash.size( ph1->hash_size );
  
--	HMAC_CTX ctx_prf;
--	HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	HMAC_CTX * ctx_prf;
 +	ctx_prf = HMAC_CTX_new();
- 
--	HMAC_Init_ex( &ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
--	HMAC_Update( &ctx_prf, input.buff(), input.size() );
--	HMAC_Final( &ctx_prf, hash.buff(), NULL );
++	HMAC_CTX_reset(ctx_prf);
++
 +	HMAC_Init_ex( ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
 +	HMAC_Update( ctx_prf, input.buff(), input.size() );
 +	HMAC_Final( ctx_prf, hash.buff(), NULL );
- 
--	HMAC_CTX_cleanup( &ctx_prf );
++
 +	HMAC_CTX_free( ctx_prf );
++#else
+ 	HMAC_CTX ctx_prf;
+ 	HMAC_CTX_init( &ctx_prf );
+ 
+@@ -1056,6 +1079,7 @@
+ 	HMAC_Final( &ctx_prf, hash.buff(), NULL );
+ 
+ 	HMAC_CTX_cleanup( &ctx_prf );
++#endif
  
  	log.bin(
  		LLOG_DEBUG,
-@@ -1093,14 +1093,14 @@
+@@ -1093,6 +1117,17 @@
  
  	hash.size( ph1->hash_size );
  
--	HMAC_CTX ctx_prf;
--	HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	HMAC_CTX * ctx_prf;
 +	ctx_prf = HMAC_CTX_new();
- 
--	HMAC_Init_ex( &ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
--	HMAC_Update( &ctx_prf, input.buff(), input.size() );
--	HMAC_Final( &ctx_prf, hash.buff(), 0 );
++	HMAC_CTX_reset(ctx_prf);
++
 +	HMAC_Init_ex( ctx_prf, ph1->skeyid_a.buff(), ( int ) ph1->skeyid_a.size(), ph1->evp_hash, NULL );
 +	HMAC_Update( ctx_prf, input.buff(), input.size() );
 +	HMAC_Final( ctx_prf, hash.buff(), 0 );
- 
--	HMAC_CTX_cleanup( &ctx_prf );
++
 +	HMAC_CTX_free( ctx_prf );
++#else
+ 	HMAC_CTX ctx_prf;
+ 	HMAC_CTX_init( &ctx_prf );
+ 
+@@ -1101,6 +1136,7 @@
+ 	HMAC_Final( &ctx_prf, hash.buff(), 0 );
+ 
+ 	HMAC_CTX_cleanup( &ctx_prf );
++#endif
  
  	log.bin(
  		LLOG_DEBUG,
-@@ -1549,13 +1549,16 @@
+@@ -1548,14 +1584,21 @@
+ 	//
  
  	BDATA shared;
- 
-+    const BIGNUM * priv_key;
-+    DH_get0_key(ph2->dh, NULL, &priv_key);
-+
+-
++	
  	if( ph2->dhgr_id )
  	{
  		if( level >= LLOG_DECODE )
  		{
  			BDATA prv;
  			prv.size( ph2->dh_size );
--			BN_bn2bin( ph2->dh->priv_key, prv.buff() );
++
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
++			const BIGNUM * priv_key;
++			DH_get0_key(ph2->dh, NULL, &priv_key);
 +			BN_bn2bin( priv_key, prv.buff() );
++#else
+ 			BN_bn2bin( ph2->dh->priv_key, prv.buff() );
++#endif
  
  			log.bin(
  				LLOG_DECODE,
-@@ -1817,56 +1820,56 @@
+@@ -1817,6 +1860,59 @@
  	// K3 = prf( SKEYID_d, K2 | [ g(qm)^xy | ] protocol | SPI | Ni_b | Nr_b )
  	//
  	
--	HMAC_CTX ctx_prf;
--	HMAC_CTX_init( &ctx_prf );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	HMAC_CTX * ctx_prf;
 +	ctx_prf = HMAC_CTX_new();
- 
--	HMAC_Init_ex( &ctx_prf, ph1->skeyid_d.buff(), ( int ) ph1->skeyid_d.size(), ph1->evp_hash, NULL );
++	HMAC_CTX_reset( ctx_prf );
++
 +	HMAC_Init_ex( ctx_prf, ph1->skeyid_d.buff(), ( int ) ph1->skeyid_d.size(), ph1->evp_hash, NULL );
- 
- 	if( ph2->dhgr_id )
--		HMAC_Update( &ctx_prf, shared.buff(), shared.size() );
++
++	if( ph2->dhgr_id )
 +		HMAC_Update( ctx_prf, shared.buff(), shared.size() );
- 
--	HMAC_Update( &ctx_prf, ( unsigned char * ) &proposal->proto, 1 );
--	HMAC_Update( &ctx_prf, ( unsigned char * ) &proposal->spi, 4 );
++
 +	HMAC_Update( ctx_prf, ( unsigned char * ) &proposal->proto, 1 );
 +	HMAC_Update( ctx_prf, ( unsigned char * ) &proposal->spi, 4 );
- 
- 	if( ph2->initiator )
- 	{
--		HMAC_Update( &ctx_prf, ph2->nonce_l.buff(), ph2->nonce_l.size() );
--		HMAC_Update( &ctx_prf, ph2->nonce_r.buff(), ph2->nonce_r.size() );
++
++	if( ph2->initiator )
++	{
 +		HMAC_Update( ctx_prf, ph2->nonce_l.buff(), ph2->nonce_l.size() );
 +		HMAC_Update( ctx_prf, ph2->nonce_r.buff(), ph2->nonce_r.size() );
- 	}
- 	else
- 	{
--		HMAC_Update( &ctx_prf, ph2->nonce_r.buff(), ph2->nonce_r.size() );
--		HMAC_Update( &ctx_prf, ph2->nonce_l.buff(), ph2->nonce_l.size() );
++	}
++	else
++	{
 +		HMAC_Update( ctx_prf, ph2->nonce_r.buff(), ph2->nonce_r.size() );
 +		HMAC_Update( ctx_prf, ph2->nonce_l.buff(), ph2->nonce_l.size() );
- 	}
- 
--	HMAC_Final( &ctx_prf, key_data, NULL );
++	}
++
 +	HMAC_Final( ctx_prf, key_data, NULL );
- 
- 	for( long size = skeyid_size; size < key_size; size += skeyid_size )
- 	{
--		HMAC_Init_ex( &ctx_prf, ph1->skeyid_d.buff(), ( int ) ph1->skeyid_d.size(), ph1->evp_hash, NULL );
--		HMAC_Update( &ctx_prf, key_data + size - skeyid_size, skeyid_size );
++
++	for( long size = skeyid_size; size < key_size; size += skeyid_size )
++	{
 +		HMAC_Init_ex( ctx_prf, ph1->skeyid_d.buff(), ( int ) ph1->skeyid_d.size(), ph1->evp_hash, NULL );
 +		HMAC_Update( ctx_prf, key_data + size - skeyid_size, skeyid_size );
- 
- 		if( ph2->dhgr_id )
--			HMAC_Update( &ctx_prf, shared.buff(), shared.size() );
++
++		if( ph2->dhgr_id )
 +			HMAC_Update( ctx_prf, shared.buff(), shared.size() );
- 
--		HMAC_Update( &ctx_prf, ( unsigned char * ) &proposal->proto, 1 );
--		HMAC_Update( &ctx_prf, ( unsigned char * ) &proposal->spi, 4 );
++
 +		HMAC_Update( ctx_prf, ( unsigned char * ) &proposal->proto, 1 );
 +		HMAC_Update( ctx_prf, ( unsigned char * ) &proposal->spi, 4 );
- 
- 		if( ph2->initiator )
- 		{
--			HMAC_Update( &ctx_prf, ph2->nonce_l.buff(), ph2->nonce_l.size() );
--			HMAC_Update( &ctx_prf, ph2->nonce_r.buff(), ph2->nonce_r.size() );
++
++		if( ph2->initiator )
++		{
 +			HMAC_Update( ctx_prf, ph2->nonce_l.buff(), ph2->nonce_l.size() );
 +			HMAC_Update( ctx_prf, ph2->nonce_r.buff(), ph2->nonce_r.size() );
- 		}
- 		else
- 		{
--			HMAC_Update( &ctx_prf, ph2->nonce_r.buff(), ph2->nonce_r.size() );
--			HMAC_Update( &ctx_prf, ph2->nonce_l.buff(), ph2->nonce_l.size() );
++		}
++		else
++		{
 +			HMAC_Update( ctx_prf, ph2->nonce_r.buff(), ph2->nonce_r.size() );
 +			HMAC_Update( ctx_prf, ph2->nonce_l.buff(), ph2->nonce_l.size() );
- 		}
- 
--		HMAC_Final( &ctx_prf, key_data + size, 0 );
++		}
++
 +		HMAC_Final( ctx_prf, key_data + size, 0 );
++	}
++
++	HMAC_CTX_free( ctx_prf );
++#else
+ 	HMAC_CTX ctx_prf;
+ 	HMAC_CTX_init( &ctx_prf );
+ 
+@@ -1867,6 +1963,7 @@
  	}
  
--	HMAC_CTX_cleanup( &ctx_prf );
-+	HMAC_CTX_free( ctx_prf );
+ 	HMAC_CTX_cleanup( &ctx_prf );
++#endif
  
  	//
  	// separate encrypt and auth key data
 diff -Nru -X exclude-ext ike.orig/source/iked/ike.idb.exch.cpp ike/source/iked/ike.idb.exch.cpp
 --- ike.orig/source/iked/ike.idb.exch.cpp	2011-01-15 23:09:32.000000000 +0100
-+++ ike/source/iked/ike.idb.exch.cpp	2019-01-11 16:16:18.664692959 +0100
-@@ -134,12 +134,13 @@
++++ ike/source/iked/ike.idb.exch.cpp	2019-01-15 10:08:44.074333069 +0100
+@@ -134,12 +134,22 @@
  	unsigned char iv_data[ EVP_MAX_MD_SIZE ];
  	unsigned long iv_size = EVP_CIPHER_iv_length( ph1->evp_cipher );
  
--	EVP_MD_CTX ctx_hash;
--	EVP_DigestInit( &ctx_hash, ph1->evp_hash );
--	EVP_DigestUpdate( &ctx_hash, ph1->iv.buff(), ph1->iv.size() );
--	EVP_DigestUpdate( &ctx_hash, &msgid, 4 );
--	EVP_DigestFinal( &ctx_hash, iv_data, NULL );
--	EVP_MD_CTX_cleanup( &ctx_hash );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	EVP_MD_CTX * ctx_hash;
 +	ctx_hash = EVP_MD_CTX_new();
 +	EVP_DigestInit( ctx_hash, ph1->evp_hash );
 +	EVP_DigestUpdate( ctx_hash, ph1->iv.buff(), ph1->iv.size() );
 +	EVP_DigestUpdate( ctx_hash, &msgid, 4 );
-+	EVP_DigestFinal( ctx_hash, iv_data, NULL );
++	EVP_DigestFinal(  ctx_hash, iv_data, NULL );
 +	EVP_MD_CTX_free( ctx_hash );
++#else
+ 	EVP_MD_CTX ctx_hash;
+ 	EVP_DigestInit( &ctx_hash, ph1->evp_hash );
+ 	EVP_DigestUpdate( &ctx_hash, ph1->iv.buff(), ph1->iv.size() );
+ 	EVP_DigestUpdate( &ctx_hash, &msgid, 4 );
+ 	EVP_DigestFinal( &ctx_hash, iv_data, NULL );
+ 	EVP_MD_CTX_cleanup( &ctx_hash );
++#endif
  
  	iv.set( iv_data, iv_size );
  
 diff -Nru -X exclude-ext ike.orig/source/iked/ike.idb.phase1.cpp ike/source/iked/ike.idb.phase1.cpp
 --- ike.orig/source/iked/ike.idb.phase1.cpp	2011-02-01 08:21:32.000000000 +0100
-+++ ike/source/iked/ike.idb.phase1.cpp	2019-01-11 16:11:19.894621059 +0100
-@@ -676,7 +676,11 @@
++++ ike/source/iked/ike.idb.phase1.cpp	2019-01-15 10:11:33.399718449 +0100
+@@ -676,7 +676,14 @@
  	}
  
  	xl.size( dh_size );
--	long result = BN_bn2bin( dh->pub_key, xl.buff() );
-+
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +    const BIGNUM * pub_key;
 +    DH_get0_key(dh, &pub_key, NULL);
 +
 +	long result = BN_bn2bin( pub_key, xl.buff() );
++#else
+ 	long result = BN_bn2bin( dh->pub_key, xl.buff() );
++#endif
  
  	//
  	// fixup public buffer alignment
 diff -Nru -X exclude-ext ike.orig/source/iked/ike.idb.phase2.cpp ike/source/iked/ike.idb.phase2.cpp
 --- ike.orig/source/iked/ike.idb.phase2.cpp	2012-11-20 00:28:52.000000000 +0100
-+++ ike/source/iked/ike.idb.phase2.cpp	2019-01-11 16:11:41.614479031 +0100
-@@ -438,7 +438,11 @@
++++ ike/source/iked/ike.idb.phase2.cpp	2019-01-15 10:18:38.578916695 +0100
+@@ -438,7 +438,14 @@
  		}
  
  		xl.size( dh_size );
--		long result = BN_bn2bin( dh->pub_key, xl.buff() );
-+
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +		const BIGNUM * pub_key;
 +		DH_get0_key(dh, &pub_key, NULL);
 +
 +		long result = BN_bn2bin( pub_key, xl.buff() );
++#else
+ 		long result = BN_bn2bin( dh->pub_key, xl.buff() );
++#endif
  
  		//
  		// fixup public buffer alignment
 diff -Nru -X exclude-ext ike.orig/source/iked/ike.keyfile.cpp ike/source/iked/ike.keyfile.cpp
 --- ike.orig/source/iked/ike.keyfile.cpp	2012-12-15 23:14:32.000000000 +0100
-+++ ike/source/iked/ike.keyfile.cpp	2019-01-11 17:49:41.781170771 +0100
-@@ -1,4 +1,3 @@
--
- /*
-  * Copyright (c) 2007
-  *      Shrew Soft Inc.  All rights reserved.
-@@ -634,7 +633,7 @@
- 
-     tsize = i2d_X509_NAME( name, &fbuff );
- 	if( !tsize )
--		goto text_asn1_failed;
-+		goto text_asn1_failed; 
- 
- 	//
- 	// return success
-@@ -664,14 +663,14 @@
++++ ike/source/iked/ike.keyfile.cpp	2019-01-15 13:03:31.238536522 +0100
+@@ -664,14 +664,22 @@
  		long ll = LLOG_ERROR;
  		char name[ 512 ];
  
--		X509_NAME * x509_name = X509_get_subject_name( store_ctx->current_cert );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +		X509_NAME * x509_name = X509_get_subject_name( X509_STORE_CTX_get_current_cert(store_ctx) );
++#else
+ 		X509_NAME * x509_name = X509_get_subject_name( store_ctx->current_cert );
++#endif
  
  		X509_NAME_oneline(
  			x509_name,
  			name,
  			512 );
  
--		switch( store_ctx->error )
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +		switch( X509_STORE_CTX_get_error(store_ctx) )
++#else
+ 		switch( store_ctx->error )
++#endif
  		{
  			case X509_V_ERR_UNABLE_TO_GET_CRL:
  				ok = 1;
-@@ -683,9 +682,9 @@
+@@ -683,9 +691,15 @@
  			ll,
  			"ii : %s(%d) at depth:%d\n"
  			"ii : subject :%s\n",
--			X509_verify_cert_error_string( store_ctx->error ),
--			store_ctx->error,
--			store_ctx->error_depth,
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +			X509_verify_cert_error_string( X509_STORE_CTX_get_error(store_ctx) ),
 +			X509_STORE_CTX_get_error(store_ctx),
 +			X509_STORE_CTX_get_error_depth(store_ctx),
++#else
+ 			X509_verify_cert_error_string( store_ctx->error ),
+ 			store_ctx->error,
+ 			store_ctx->error_depth,
++#endif	
  			name );
  	}
  
-@@ -857,7 +856,7 @@
+@@ -857,7 +871,11 @@
  	if( evp_pkey == NULL )
  		return false;
  
--	bool converted = prvkey_rsa_2_bdata( prvkey, evp_pkey->pkey.rsa );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	bool converted = prvkey_rsa_2_bdata( prvkey, EVP_PKEY_get0_RSA(evp_pkey) );
++#else
+ 	bool converted = prvkey_rsa_2_bdata( prvkey, evp_pkey->pkey.rsa );
++#endif
  	EVP_PKEY_free( evp_pkey );
  
  	return converted;
-@@ -883,7 +882,7 @@
+@@ -883,7 +901,11 @@
  	if( evp_pkey == NULL )
  		return false;
  
--	bool converted = prvkey_rsa_2_bdata( prvkey, evp_pkey->pkey.rsa );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	bool converted = prvkey_rsa_2_bdata( prvkey, EVP_PKEY_get0_RSA(evp_pkey) );
++#else
+ 	bool converted = prvkey_rsa_2_bdata( prvkey, evp_pkey->pkey.rsa );
++#endif
  	EVP_PKEY_free( evp_pkey );
  
  	return converted;
-@@ -939,7 +938,7 @@
+@@ -939,7 +961,11 @@
  	if( evp_pkey == NULL )
  		return false;
  
--	bool converted = prvkey_rsa_2_bdata( prvkey, evp_pkey->pkey.rsa );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	bool converted = prvkey_rsa_2_bdata( prvkey, EVP_PKEY_get0_RSA(evp_pkey) );
++#else
+ 	bool converted = prvkey_rsa_2_bdata( prvkey, evp_pkey->pkey.rsa );
++#endif
  	EVP_PKEY_free( evp_pkey );
  
  	return converted;
-@@ -976,7 +975,7 @@
+@@ -976,7 +1002,11 @@
  	if( evp_pkey == NULL )
  		return false;
  
--	bool converted = prvkey_rsa_2_bdata( prvkey, evp_pkey->pkey.rsa );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +	bool converted = prvkey_rsa_2_bdata( prvkey, EVP_PKEY_get0_RSA(evp_pkey) );
++#else
+ 	bool converted = prvkey_rsa_2_bdata( prvkey, evp_pkey->pkey.rsa );
++#endif
  	EVP_PKEY_free( evp_pkey );
  
  	return converted;
-@@ -1010,7 +1009,7 @@
+@@ -1010,7 +1040,11 @@
  	if( evp_pkey == NULL )
  		return false;
  
--	bool result = pubkey_rsa_2_bdata( pubkey, evp_pkey->pkey.rsa );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 + 	bool result = pubkey_rsa_2_bdata( pubkey, EVP_PKEY_get0_RSA(evp_pkey));
++#else
+ 	bool result = pubkey_rsa_2_bdata( pubkey, evp_pkey->pkey.rsa );
++#endif
  
  	EVP_PKEY_free( evp_pkey );
  
-diff -Nru -X exclude-ext ike.orig/source/iked/location.hh ike/source/iked/location.hh
---- ike.orig/source/iked/location.hh	1970-01-01 01:00:00.000000000 +0100
-+++ ike/source/iked/location.hh	2019-01-11 17:50:08.997432924 +0100
-@@ -0,0 +1,192 @@
-+// A Bison parser, made by GNU Bison 3.0.4.
-+
-+// Locations for Bison parsers in C++
-+
-+// Copyright (C) 2002-2015 Free Software Foundation, Inc.
-+
-+// This program is free software: you can redistribute it and/or modify
-+// it under the terms of the GNU General Public License as published by
-+// the Free Software Foundation, either version 3 of the License, or
-+// (at your option) any later version.
-+
-+// This program is distributed in the hope that it will be useful,
-+// but WITHOUT ANY WARRANTY; without even the implied warranty of
-+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+// GNU General Public License for more details.
-+
-+// You should have received a copy of the GNU General Public License
-+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-+
-+// As a special exception, you may create a larger work that contains
-+// part or all of the Bison parser skeleton and distribute that work
-+// under terms of your choice, so long as that work isn't itself a
-+// parser generator using the skeleton or a modified version thereof
-+// as a parser skeleton.  Alternatively, if you modify or redistribute
-+// the parser skeleton itself, you may (at your option) remove this
-+// special exception, which will cause the skeleton and the resulting
-+// Bison output files to be licensed under the GNU General Public
-+// License without this special exception.
-+
-+// This special exception was added by the Free Software Foundation in
-+// version 2.2 of Bison.
-+
-+/**
-+ ** \file location.hh
-+ ** Define the yy::location class.
-+ */
-+
-+#ifndef YY_YY_LOCATION_HH_INCLUDED
-+# define YY_YY_LOCATION_HH_INCLUDED
-+
-+# include "position.hh"
-+
-+
-+namespace yy {
-+#line 46 "location.hh" // location.cc:296
-+  /// Abstract a location.
-+  class location
-+  {
-+  public:
-+
-+    /// Construct a location from \a b to \a e.
-+    location (const position& b, const position& e)
-+      : begin (b)
-+      , end (e)
-+    {
-+    }
-+
-+    /// Construct a 0-width location in \a p.
-+    explicit location (const position& p = position ())
-+      : begin (p)
-+      , end (p)
-+    {
-+    }
-+
-+    /// Construct a 0-width location in \a f, \a l, \a c.
-+    explicit location (std::string* f,
-+                       unsigned int l = 1u,
-+                       unsigned int c = 1u)
-+      : begin (f, l, c)
-+      , end (f, l, c)
-+    {
-+    }
-+
-+
-+    /// Initialization.
-+    void initialize (std::string* f = YY_NULLPTR,
-+                     unsigned int l = 1u,
-+                     unsigned int c = 1u)
-+    {
-+      begin.initialize (f, l, c);
-+      end = begin;
-+    }
-+
-+    /** \name Line and Column related manipulators
-+     ** \{ */
-+  public:
-+    /// Reset initial location to final location.
-+    void step ()
-+    {
-+      begin = end;
-+    }
-+
-+    /// Extend the current location to the COUNT next columns.
-+    void columns (int count = 1)
-+    {
-+      end += count;
-+    }
-+
-+    /// Extend the current location to the COUNT next lines.
-+    void lines (int count = 1)
-+    {
-+      end.lines (count);
-+    }
-+    /** \} */
-+
-+
-+  public:
-+    /// Beginning of the located region.
-+    position begin;
-+    /// End of the located region.
-+    position end;
-+  };
-+
-+  /// Join two locations, in place.
-+  inline location& operator+= (location& res, const location& end)
-+  {
-+    res.end = end.end;
-+    return res;
-+  }
-+
-+  /// Join two locations.
-+  inline location operator+ (location res, const location& end)
-+  {
-+    return res += end;
-+  }
-+
-+  /// Add \a width columns to the end position, in place.
-+  inline location& operator+= (location& res, int width)
-+  {
-+    res.columns (width);
-+    return res;
-+  }
-+
-+  /// Add \a width columns to the end position.
-+  inline location operator+ (location res, int width)
-+  {
-+    return res += width;
-+  }
-+
-+  /// Subtract \a width columns to the end position, in place.
-+  inline location& operator-= (location& res, int width)
-+  {
-+    return res += -width;
-+  }
-+
-+  /// Subtract \a width columns to the end position.
-+  inline location operator- (location res, int width)
-+  {
-+    return res -= width;
-+  }
-+
-+  /// Compare two location objects.
-+  inline bool
-+  operator== (const location& loc1, const location& loc2)
-+  {
-+    return loc1.begin == loc2.begin && loc1.end == loc2.end;
-+  }
-+
-+  /// Compare two location objects.
-+  inline bool
-+  operator!= (const location& loc1, const location& loc2)
-+  {
-+    return !(loc1 == loc2);
-+  }
-+
-+  /** \brief Intercept output stream redirection.
-+   ** \param ostr the destination output stream
-+   ** \param loc a reference to the location to redirect
-+   **
-+   ** Avoid duplicate information.
-+   */
-+  template <typename YYChar>
-+  inline std::basic_ostream<YYChar>&
-+  operator<< (std::basic_ostream<YYChar>& ostr, const location& loc)
-+  {
-+    unsigned int end_col = 0 < loc.end.column ? loc.end.column - 1 : 0;
-+    ostr << loc.begin;
-+    if (loc.end.filename
-+        && (!loc.begin.filename
-+            || *loc.begin.filename != *loc.end.filename))
-+      ostr << '-' << loc.end.filename << ':' << loc.end.line << '.' << end_col;
-+    else if (loc.begin.line < loc.end.line)
-+      ostr << '-' << loc.end.line << '.' << end_col;
-+    else if (loc.begin.column < end_col)
-+      ostr << '-' << end_col;
-+    return ostr;
-+  }
-+
-+
-+} // yy
-+#line 192 "location.hh" // location.cc:296
-+#endif // !YY_YY_LOCATION_HH_INCLUDED
-diff -Nru -X exclude-ext ike.orig/source/iked/position.hh ike/source/iked/position.hh
---- ike.orig/source/iked/position.hh	1970-01-01 01:00:00.000000000 +0100
-+++ ike/source/iked/position.hh	2019-01-11 17:50:08.989432847 +0100
-@@ -0,0 +1,180 @@
-+// A Bison parser, made by GNU Bison 3.0.4.
-+
-+// Positions for Bison parsers in C++
-+
-+// Copyright (C) 2002-2015 Free Software Foundation, Inc.
-+
-+// This program is free software: you can redistribute it and/or modify
-+// it under the terms of the GNU General Public License as published by
-+// the Free Software Foundation, either version 3 of the License, or
-+// (at your option) any later version.
-+
-+// This program is distributed in the hope that it will be useful,
-+// but WITHOUT ANY WARRANTY; without even the implied warranty of
-+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+// GNU General Public License for more details.
-+
-+// You should have received a copy of the GNU General Public License
-+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-+
-+// As a special exception, you may create a larger work that contains
-+// part or all of the Bison parser skeleton and distribute that work
-+// under terms of your choice, so long as that work isn't itself a
-+// parser generator using the skeleton or a modified version thereof
-+// as a parser skeleton.  Alternatively, if you modify or redistribute
-+// the parser skeleton itself, you may (at your option) remove this
-+// special exception, which will cause the skeleton and the resulting
-+// Bison output files to be licensed under the GNU General Public
-+// License without this special exception.
-+
-+// This special exception was added by the Free Software Foundation in
-+// version 2.2 of Bison.
-+
-+/**
-+ ** \file position.hh
-+ ** Define the yy::position class.
-+ */
-+
-+#ifndef YY_YY_POSITION_HH_INCLUDED
-+# define YY_YY_POSITION_HH_INCLUDED
-+
-+# include <algorithm> // std::max
-+# include <iostream>
-+# include <string>
-+
-+# ifndef YY_NULLPTR
-+#  if defined __cplusplus && 201103L <= __cplusplus
-+#   define YY_NULLPTR nullptr
-+#  else
-+#   define YY_NULLPTR 0
-+#  endif
-+# endif
-+
-+
-+namespace yy {
-+#line 56 "position.hh" // location.cc:296
-+  /// Abstract a position.
-+  class position
-+  {
-+  public:
-+    /// Construct a position.
-+    explicit position (std::string* f = YY_NULLPTR,
-+                       unsigned int l = 1u,
-+                       unsigned int c = 1u)
-+      : filename (f)
-+      , line (l)
-+      , column (c)
-+    {
-+    }
-+
-+
-+    /// Initialization.
-+    void initialize (std::string* fn = YY_NULLPTR,
-+                     unsigned int l = 1u,
-+                     unsigned int c = 1u)
-+    {
-+      filename = fn;
-+      line = l;
-+      column = c;
-+    }
-+
-+    /** \name Line and Column related manipulators
-+     ** \{ */
-+    /// (line related) Advance to the COUNT next lines.
-+    void lines (int count = 1)
-+    {
-+      if (count)
-+        {
-+          column = 1u;
-+          line = add_ (line, count, 1);
-+        }
-+    }
-+
-+    /// (column related) Advance to the COUNT next columns.
-+    void columns (int count = 1)
-+    {
-+      column = add_ (column, count, 1);
-+    }
-+    /** \} */
-+
-+    /// File name to which this position refers.
-+    std::string* filename;
-+    /// Current line number.
-+    unsigned int line;
-+    /// Current column number.
-+    unsigned int column;
-+
-+  private:
-+    /// Compute max(min, lhs+rhs) (provided min <= lhs).
-+    static unsigned int add_ (unsigned int lhs, int rhs, unsigned int min)
-+    {
-+      return (0 < rhs || -static_cast<unsigned int>(rhs) < lhs
-+              ? rhs + lhs
-+              : min);
-+    }
-+  };
-+
-+  /// Add \a width columns, in place.
-+  inline position&
-+  operator+= (position& res, int width)
-+  {
-+    res.columns (width);
-+    return res;
-+  }
-+
-+  /// Add \a width columns.
-+  inline position
-+  operator+ (position res, int width)
-+  {
-+    return res += width;
-+  }
-+
-+  /// Subtract \a width columns, in place.
-+  inline position&
-+  operator-= (position& res, int width)
-+  {
-+    return res += -width;
-+  }
-+
-+  /// Subtract \a width columns.
-+  inline position
-+  operator- (position res, int width)
-+  {
-+    return res -= width;
-+  }
-+
-+  /// Compare two position objects.
-+  inline bool
-+  operator== (const position& pos1, const position& pos2)
-+  {
-+    return (pos1.line == pos2.line
-+            && pos1.column == pos2.column
-+            && (pos1.filename == pos2.filename
-+                || (pos1.filename && pos2.filename
-+                    && *pos1.filename == *pos2.filename)));
-+  }
-+
-+  /// Compare two position objects.
-+  inline bool
-+  operator!= (const position& pos1, const position& pos2)
-+  {
-+    return !(pos1 == pos2);
-+  }
-+
-+  /** \brief Intercept output stream redirection.
-+   ** \param ostr the destination output stream
-+   ** \param pos a reference to the position to redirect
-+   */
-+  template <typename YYChar>
-+  inline std::basic_ostream<YYChar>&
-+  operator<< (std::basic_ostream<YYChar>& ostr, const position& pos)
-+  {
-+    if (pos.filename)
-+      ostr << *pos.filename << ':';
-+    return ostr << pos.line << '.' << pos.column;
-+  }
-+
-+
-+} // yy
-+#line 180 "position.hh" // location.cc:296
-+#endif // !YY_YY_POSITION_HH_INCLUDED
-diff -Nru -X exclude-ext ike.orig/source/iked/stack.hh ike/source/iked/stack.hh
---- ike.orig/source/iked/stack.hh	1970-01-01 01:00:00.000000000 +0100
-+++ ike/source/iked/stack.hh	2019-01-11 17:50:08.997432924 +0100
-@@ -0,0 +1,157 @@
-+// A Bison parser, made by GNU Bison 3.0.4.
-+
-+// Stack handling for Bison parsers in C++
-+
-+// Copyright (C) 2002-2015 Free Software Foundation, Inc.
-+
-+// This program is free software: you can redistribute it and/or modify
-+// it under the terms of the GNU General Public License as published by
-+// the Free Software Foundation, either version 3 of the License, or
-+// (at your option) any later version.
-+
-+// This program is distributed in the hope that it will be useful,
-+// but WITHOUT ANY WARRANTY; without even the implied warranty of
-+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+// GNU General Public License for more details.
-+
-+// You should have received a copy of the GNU General Public License
-+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-+
-+// As a special exception, you may create a larger work that contains
-+// part or all of the Bison parser skeleton and distribute that work
-+// under terms of your choice, so long as that work isn't itself a
-+// parser generator using the skeleton or a modified version thereof
-+// as a parser skeleton.  Alternatively, if you modify or redistribute
-+// the parser skeleton itself, you may (at your option) remove this
-+// special exception, which will cause the skeleton and the resulting
-+// Bison output files to be licensed under the GNU General Public
-+// License without this special exception.
-+
-+// This special exception was added by the Free Software Foundation in
-+// version 2.2 of Bison.
-+
-+/**
-+ ** \file stack.hh
-+ ** Define the yy::stack class.
-+ */
-+
-+#ifndef YY_YY_STACK_HH_INCLUDED
-+# define YY_YY_STACK_HH_INCLUDED
-+
-+# include <vector>
-+
-+
-+namespace yy {
-+#line 46 "stack.hh" // stack.hh:132
-+  template <class T, class S = std::vector<T> >
-+  class stack
-+  {
-+  public:
-+    // Hide our reversed order.
-+    typedef typename S::reverse_iterator iterator;
-+    typedef typename S::const_reverse_iterator const_iterator;
-+
-+    stack ()
-+      : seq_ ()
-+    {
-+      seq_.reserve (200);
-+    }
-+
-+    stack (unsigned int n)
-+      : seq_ (n)
-+    {}
-+
-+    inline
-+    T&
-+    operator[] (unsigned int i)
-+    {
-+      return seq_[seq_.size () - 1 - i];
-+    }
-+
-+    inline
-+    const T&
-+    operator[] (unsigned int i) const
-+    {
-+      return seq_[seq_.size () - 1 - i];
-+    }
-+
-+    /// Steal the contents of \a t.
-+    ///
-+    /// Close to move-semantics.
-+    inline
-+    void
-+    push (T& t)
-+    {
-+      seq_.push_back (T());
-+      operator[](0).move (t);
-+    }
-+
-+    inline
-+    void
-+    pop (unsigned int n = 1)
-+    {
-+      for (; n; --n)
-+        seq_.pop_back ();
-+    }
-+
-+    void
-+    clear ()
-+    {
-+      seq_.clear ();
-+    }
-+
-+    inline
-+    typename S::size_type
-+    size () const
-+    {
-+      return seq_.size ();
-+    }
-+
-+    inline
-+    const_iterator
-+    begin () const
-+    {
-+      return seq_.rbegin ();
-+    }
-+
-+    inline
-+    const_iterator
-+    end () const
-+    {
-+      return seq_.rend ();
-+    }
-+
-+  private:
-+    stack (const stack&);
-+    stack& operator= (const stack&);
-+    /// The wrapped container.
-+    S seq_;
-+  };
-+
-+  /// Present a slice of the top of a stack.
-+  template <class T, class S = stack<T> >
-+  class slice
-+  {
-+  public:
-+    slice (const S& stack, unsigned int range)
-+      : stack_ (stack)
-+      , range_ (range)
-+    {}
-+
-+    inline
-+    const T&
-+    operator [] (unsigned int i) const
-+    {
-+      return stack_[range_ - i];
-+    }
-+
-+  private:
-+    const S& stack_;
-+    unsigned int range_;
-+  };
-+
-+
-+} // yy
-+#line 156 "stack.hh" // stack.hh:132
-+
-+#endif // !YY_YY_STACK_HH_INCLUDED
 diff -Nru -X exclude-ext ike.orig/source/libike/manager.file.cpp ike/source/libike/manager.file.cpp
 --- ike.orig/source/libike/manager.file.cpp	2011-02-06 17:40:00.000000000 +0100
-+++ ike/source/libike/manager.file.cpp	2019-01-10 17:56:21.089289317 +0100
-@@ -679,11 +679,13 @@
++++ ike/source/libike/manager.file.cpp	2019-01-15 13:08:15.764559954 +0100
+@@ -679,6 +679,25 @@
  			BDATA pwd;
  			data.get( pwd );
  
--			EVP_CIPHER_CTX ctx_cipher;
--			EVP_CIPHER_CTX_init( &ctx_cipher );
++#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 +			EVP_CIPHER_CTX * ctx_cipher;
 +			ctx_cipher = EVP_CIPHER_CTX_new();
-+
 +			EVP_CIPHER_CTX_init( ctx_cipher );
- 
- 			EVP_CipherInit_ex(
--				&ctx_cipher,
++
++			EVP_CipherInit_ex(
 +				ctx_cipher,
- 				EVP_des_ede3_cbc(),
- 				NULL,
- 				key,
-@@ -691,7 +693,7 @@
- 				0 );
- 
- 			EVP_Cipher(
--				&ctx_cipher,
++				EVP_des_ede3_cbc(),
++				NULL,
++				key,
++				data.buff(),
++				0 );
++
++			EVP_Cipher(
 +				ctx_cipher,
++				pwd.buff(),
++				pwd.buff(),
++				( unsigned int ) pwd.size() );
++#else
+ 			EVP_CIPHER_CTX ctx_cipher;
+ 			EVP_CIPHER_CTX_init( &ctx_cipher );
+ 
+@@ -695,11 +714,14 @@
  				pwd.buff(),
  				pwd.buff(),
  				( unsigned int ) pwd.size() );
++#endif
+ 
+ 			pwlen -= pwd.buff()[ pwd.size() - 1 ];
+ 			pwd.size( pwlen );
+ 
+ 			config.set_binary( "auth-mutual-psk", pwd );
++
++			EVP_CIPHER_CTX_free(ctx_cipher);
+ 		}
+ 
+ 		if( !_stricmp( name.text(), "DHGroup" ) && data.size() )
